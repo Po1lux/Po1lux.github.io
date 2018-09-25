@@ -3,7 +3,7 @@ title: test
 date: 2018-09-22 18:08:59
 tags:
 ---
-![](test/1.JPG)
+![](test/1.jpg)
 > 引用
 
 *斜体*
