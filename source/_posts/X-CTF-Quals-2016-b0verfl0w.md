@@ -1,7 +1,8 @@
 ---
 title: X-CTF Quals 2016 - b0verfl0w
 date: 2018-09-30 10:49:33
-tags:
+tags: [stack pivoting]
+categories: [stack]
 ---
 ## 查看程序的安全保护，程序未开启NX
 ```
@@ -31,7 +32,7 @@ signed int vul()
 ```
 
 ## 分析汇编代码,fgets函数可以溢出0x28个字节的数据
-我的理解是看`call    _fgets`这个call上面的参数，`lea     eax, [ebp+s]`ebp加上写入地址s的偏移后将该地址传给eax，值为[ebp-0x20]，`mov     [esp], eax`这句代码将上述的地址，传递给esp，现在栈顶指针指向的是s的具体地址，这个地址到ebp的距离为0x20各字节，所以最多可以溢出0x28个字节的数据
+我的理解是看`call    _fgets`这个call上面的参数，`lea     eax, [ebp+s]`ebp加上写入地址s的偏移后将该地址传给eax，值为[ebp-0x20]，`mov     [esp], eax`这句代码将上述的地址，传递给esp，现在栈指针指向的是s的具体地址，这个地址到ebp的距离为0x20各字节，所以最多可以溢出0x28个字节的数据
 
 ```
 .text:0804851B vul             proc near               ; CODE XREF: main+6↑p
@@ -72,9 +73,9 @@ signed int vul()
 ```
 
 ## 由于程序未开启NX，所以思路是在栈上布置shellcode，然后控制vul函数返回地址，即控制eip执行栈上的shellcode，栈上的布置如下：
-> shellcoed|fake ebp|jmp esp gadgets|seb esp,0x28;jmp esp
+> shellcoed || fake ebp || 0x08048504 || asm(sub esp,0x28;jmp esp)
 
-通过jmp esp 的gadgets，将程序的eip指向栈中的代码，即`seb esp,0x28;jmp esp` 。正常情况下eip指向的是.text段中的代码，所以需要将`seb esp,0x28;jmp esp`转化为机器码，这里指的是十六进制机器码
+0x08048504为jmp esp 的gadgets，覆盖了返回地址，当程序执行到ret时，将该地址pop给eip，并且esp会加4指向`asm(sub esp,0x28;jmp esp)`,然后eip执行地址0x08048504上的代码`jmp esp`，eip又会执行esp指向的`sub esp,0x28;jmp esp`，完成esp的劫持。正常情况下eip指向的是.text段中的代码，所以需要将`sub esp,0x28;jmp esp`转化为机器码，这里是十六进制机器码
 
 ## 通过ROPgadget，找到jmp esp gadgets的地址为0x08048504
 ```
