@@ -74,7 +74,7 @@ free@plt (
 
 
 ## 程序
-程序edit部分未能对长度进行检测，导致出现堆溢出漏洞。第一次edit，free是为了获取一个原指向堆的可控指针`0x6016d0 -> 0x6016b8`。第二次edit，将该指针`0x6016d0`指向free@got，然后通过list获取free@got的地址，计算libc的基址，通过偏移计算出system的地址。第三次edit将system的地址写入free@got指向的地址，free函数就被替换成system函数了，释放chunk2后，即获取shell。
+程序edit部分未能和原长度进行判断，导致出现堆溢出漏洞。第一次edit，free是为了获取一个原指向堆的可控指针`0x6016d0 -> 0x6016b8`。第二次edit，将该指针`0x6016d0`指向free@got，然后通过list获取free@got的地址，计算libc的基址，通过偏移计算出system的地址。第三次edit将system的地址写入free@got指向的地址，free函数就被替换成system函数了，释放chunk2后，即获取shell。
 
 ## EXP
 ```
@@ -154,3 +154,7 @@ def exp():
 
 exp()
 ```
+
+## REF
+[http://www.ms509.com/2016/01/22/glibc-heap-ctf-writeup](http://www.ms509.com/2016/01/22/glibc-heap-ctf-writeup)
+[http://www.cnblogs.com/shangye/p/6261606.html](http://www.cnblogs.com/shangye/p/6261606.html)
