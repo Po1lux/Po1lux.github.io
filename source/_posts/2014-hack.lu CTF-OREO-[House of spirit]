@@ -1,15 +1,27 @@
 ---
-title: oreo
+title: 2014-hack.lu CTF-OREO-[House of spirit]
 date: 2019-03-08 09:48:23
 tags: [fastbin attack,House of spirit]
 ---
 
 ### House of spirit
-House of spirit是文章“The Mallo Maleficarum”提出的一种利用fastbin实施堆攻击的内存漏洞利用技术，其思想就是构造一个fake chunk使得内存分配器错误的分配到我们可控的内存区域，进而达到任意地址读写的的效果。该攻击适合用户控制了低地址(chunk头)、高地址(next chunk头)，需要通过House of spirit来控制中间地址的情景
+House of spirit是文章“The Mallo Maleficarum”提出的一种利用fastbin实施的堆利用技术，更像一种内存漏洞利用技术的思想。其思想就是构造一个fake chunk使得内存分配器错误的分配到我们可控的内存区域，进而达到任意地址读写的的效果。该攻击适合用户控制了低地址(chunk头)、高地址(next chunk头)，需要通过House of spirit来控制中间地址的情景
 
-House of sirit的利用思路如下：
+
+House of sirit的条件与基本思路如下：
 1. 程序存在漏洞可以控制一个free函数的参数——指针P
 2. 可在可控内存区域(.bss,stack,heap)上构造一个fake fastchunk
+```
++------------------+
+|     可控区域1     |
++------------------+
+| 目标区域（不可控，  |
+| 多为返回地址或函数  |
+| 指针等）          |
++------------------+
+|     可控区域2     |
++------------------+
+```
 3. 将指针P修改为fack fastchunk的chunk address，将其free到FastbinY[i]单链表中
 4. 再次申请同样大小的chunk，会返回fake fastchunk，结合程序的功能实现任意地址读写的效果
 
@@ -53,7 +65,7 @@ if (__builtin_expect ((uintptr_t) p > (uintptr_t) -size, 0)
 if (__glibc_unlikely (size < MINSIZE || !aligned_OK (size)))
     malloc_printerr ("free(): invalid size");
 ```
-4. chunk的size要小于fastchunk支持的最大值
+4. chunk的size要小于fastchunk支持的最大值(64 bytes on x32, 128 bytes on x64)
 ```C
 if ((unsigned long)(size) <= (unsigned long)(get_max_fast ())
 ```
@@ -157,7 +169,7 @@ if ( dword_804A2A4 )
 |    0x41    |  # 伪造的chunk size要对齐0x41或者0x40都可以
 +------------+<-fake_addr(ptr)
 | 0x0804a2c0 |  # 0x804A2A8
-+------------+   
++------------+
 |    0x0     |
 +------------+
 |     ...    |
@@ -250,3 +262,6 @@ def pwn():
 if __name__ == '__mian__':
   pwn()
 ```
+
+## 总结
+House of spirit就是通过伪造一个fake fastchunk，绕过glibc的检测，让程序成功free掉该fake chunk，然后通过fastbin的分配机制，再次申请到该fake chunk，从而达到任意地址读写的效果，oreo只是一种利用方式，比如还可以利用House of spirit将chunk释放到栈中，然后修改函数的返回地址，劫持程序流。
