@@ -1,5 +1,5 @@
 ---
-title: 2016-HCTF-fheap-[UAF]
+title: 2016-HCTF-fheap-[fastbin UAF,PIE,DynELF use fmt]
 date: 2019-03-02 14:39:57
 tags: [UAF,DynELF,PIE,format string]
 ---
@@ -46,7 +46,9 @@ typedef struct String{
 
 ```
 获取了程序的基址，接下来就是获取system函数的地址，因为程序为调用过system函数，所以使用pwntools的DynELF函数对程序使用的libc库进行搜索，获取system函数的地址。
+
 ## 利用UAF和格式化字符串漏洞获取system地址
+
 DynELF是pwntools中专门用来应对无libc情况的漏洞利用模块，需要一个程序存在可以反复触发信息泄露的漏洞，从而可以不断泄露libc地址空间内的信息。
 将`void (*free)(struct String *ptr);`覆盖为printf，进而构造利用格式化字符串漏洞泄露内存。leak函数如下
 ```
