@@ -143,9 +143,9 @@ unsigned __int64 edit_note()
 
 ```
 +-----------------+
-|  		  0         |  #unsortedbin chunk (freed chunk2)
+|  		  0       |  #unsortedbin chunk (freed chunk2)
 +-----------------+
-|      0x621 	  	|  
+|      0x621      |  
 +-----------------+
 |        0        |  # fd
 +-----------------+
@@ -153,9 +153,9 @@ unsigned __int64 edit_note()
 +-----------------+
 
 +-------------------+
-|  		  0           |  #largebin chunk (freed chunk6)
+|  		  0         |  #largebin chunk (freed chunk6)
 +-------------------+
-|      0x611 	    	|  
+|      0x611     	|  
 +-------------------+
 |        0          |  # fd
 +-------------------+
