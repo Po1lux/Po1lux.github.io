@@ -27,10 +27,12 @@
 <meta property="og:site_name" content="Po1lux&#39;s Diary">
 <meta property="og:description" content="&amp;#x5185;&amp;#x5B58;&amp;#x7BA1;&amp;#x7406;&amp;#x5B9E;&amp;#x73B0;&amp;#x9AD8;&amp;#x5EA6;&amp;#x4F9D;&amp;#x8D56;&amp;#x786C;&amp;#x4EF6;&amp;#xFF0C;&amp;#x6BD4;&amp;#x5982;MMU&amp;#xFF1A;&amp;#x5904;&amp;#x7406;CPU&amp;#x5B58;&amp;#x50A8;&amp;#x8BBF;&amp;#x95EE;&amp;#x8BF7;&amp;#x6C42;&amp;#">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-02-25T13:49:31.700Z">
+<meta property="og:image" content="http://yoursite.com/2019/10/03/mineucore-物理内存管理学习笔记/20160927100915063.png">
+<meta property="og:updated_time" content="2020-07-11T07:07:32.257Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mineucore-物理内存管理学习笔记">
 <meta name="twitter:description" content="&amp;#x5185;&amp;#x5B58;&amp;#x7BA1;&amp;#x7406;&amp;#x5B9E;&amp;#x73B0;&amp;#x9AD8;&amp;#x5EA6;&amp;#x4F9D;&amp;#x8D56;&amp;#x786C;&amp;#x4EF6;&amp;#xFF0C;&amp;#x6BD4;&amp;#x5982;MMU&amp;#xFF1A;&amp;#x5904;&amp;#x7406;CPU&amp;#x5B58;&amp;#x50A8;&amp;#x8BBF;&amp;#x95EE;&amp;#x8BF7;&amp;#x6C42;&amp;#">
+<meta name="twitter:image" content="http://yoursite.com/2019/10/03/mineucore-物理内存管理学习笔记/20160927100915063.png">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     
@@ -443,6 +445,7 @@ height:50vh;
 <p>TIPS&#xFF1A;pages~0x38000000&#x7684;&#x6BCF;&#x4E00;&#x4E2A;&#x7269;&#x7406;&#x9875;&#x90FD;&#x5BF9;&#x5E94;&#x4E00;&#x4E2A;Page&#x7ED3;&#x6784;&#x4F53;&#xFF0C;ucore&#x901A;&#x8FC7;Page&#x7ED3;&#x6784;&#x4F53;&#x53BB;&#x7BA1;&#x7406;&#x7269;&#x7406;&#x5185;&#x5B58;&#xFF0C;free_area_t&#x7ED3;&#x6784;&#x4F53;&#x8BB0;&#x5F55;&#x7A7A;&#x95F2;&#x7684;&#x8FDE;&#x7EED;&#x7269;&#x7406;&#x5185;&#x5B58;&#x5757;&#x3002;</p>
 <h2 id="0x04-first-fit&#x8FDE;&#x7EED;&#x7269;&#x7406;&#x5185;&#x5B58;&#x5206;&#x914D;&#x7B97;&#x6CD5;&#xFF08;&#x5B9E;&#x9A8C;&#xFF09;"><a href="#0x04-first-fit&#x8FDE;&#x7EED;&#x7269;&#x7406;&#x5185;&#x5B58;&#x5206;&#x914D;&#x7B97;&#x6CD5;&#xFF08;&#x5B9E;&#x9A8C;&#xFF09;" class="headerlink" title="0x04 first-fit&#x8FDE;&#x7EED;&#x7269;&#x7406;&#x5185;&#x5B58;&#x5206;&#x914D;&#x7B97;&#x6CD5;&#xFF08;&#x5B9E;&#x9A8C;&#xFF09;"></a>0x04 first-fit&#x8FDE;&#x7EED;&#x7269;&#x7406;&#x5185;&#x5B58;&#x5206;&#x914D;&#x7B97;&#x6CD5;&#xFF08;&#x5B9E;&#x9A8C;&#xFF09;</h2><h3 id="&#x601D;&#x8DEF;"><a href="#&#x601D;&#x8DEF;" class="headerlink" title="&#x601D;&#x8DEF;"></a>&#x601D;&#x8DEF;</h3><p>first-fit&#x7B97;&#x6CD5;&#x7684;&#x601D;&#x8DEF;&#x5C31;&#x662F;&#x6309;&#x5E8F;&#x904D;&#x5386;&#xFF0C;&#x5F53;&#x5927;&#x5C0F;&#x6EE1;&#x8DB3;&#x5373;&#x5206;&#x914D;&#xFF0C;&#x5177;&#x4F53;&#x6765;&#x8BF4;&#xFF1A;&#x5F53;&#x7533;&#x8BF7;&#x5185;&#x5B58;&#x65F6;first-fit&#x7684;&#x601D;&#x8DEF;&#x662F;&#x4ECE;&#x7A7A;&#x95F2;&#x94FE;&#x8868;&#x7684;&#x8868;&#x5934;&#x5F00;&#x59CB;&#x5BFB;&#x627E;&#x5730;&#x5740;&#x6700;&#x5C0F;&#x7684;&#x7269;&#x7406;&#x9875;&#xFF0C;&#x901A;&#x8FC7;nr_free-&gt;next&#x6216;&#x8005;&#x901A;&#x8FC7;&#x5B9A;&#x4E49;&#x597D;&#x7684;&#x51FD;&#x6570;list_next&#x53BB;&#x5BFB;&#x627E;&#xFF0C;&#x627E;&#x5230;&#x7A7A;&#x95F2;&#x7269;&#x7406;&#x9875;&#x540E;&#xFF0C;&#x9700;&#x8981;&#x5224;&#x65AD;&#x5927;&#x5C0F;&#x662F;&#x4E0D;&#x662F;&#x6EE1;&#x8DB3;&#xFF0C;&#x8FD9;&#x4E3B;&#x8981;&#x901A;&#x8FC7;Page&#x7ED3;&#x6784;&#x4F53;&#x7684;property&#x6210;&#x5458;&#x5224;&#x65AD;&#xFF0C;&#x6240;&#x4EE5;&#x9700;&#x8981;&#x901A;&#x8FC7;le2page&#x5B8F;&#xFF0C;&#x901A;&#x8FC7;&#x94FE;&#x8868;&#x5143;&#x7D20;&#x6307;&#x9488;nr_free&#x8BA1;&#x7B97;&#x51FA;&#x76F8;&#x5E94;&#x7684;Page&#x6307;&#x9488;p&#xFF0C;&#x5F53;property&gt;=n&#x65F6;&#xFF0C;&#x5927;&#x5C0F;&#x6EE1;&#x8DB3;&#xFF0C;&#x5373;&#x5206;&#x914D;&#x51FA;&#x53BB;&#x3002;</p>
 <h3 id="&#x5B9E;&#x73B0;"><a href="#&#x5B9E;&#x73B0;" class="headerlink" title="&#x5B9E;&#x73B0;"></a>&#x5B9E;&#x73B0;</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">Page</span> *</span></span><br><span class="line"><span class="class"><span class="title">default_alloc_pages</span>(<span class="title">size_t</span> <span class="title">n</span>) {</span></span><br><span class="line">    assert(n &gt; <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (n &gt; nr_free) {</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    }</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">Page</span> *<span class="title">page</span> = <span class="title">NULL</span>;</span></span><br><span class="line">    <span class="keyword">list_entry_t</span> *le = &amp;free_list;</span><br><span class="line">    <span class="comment">// <span class="doctag">TODO:</span> optimize (next-fit)</span></span><br><span class="line">    <span class="keyword">while</span> ((le = list_next(le)) != &amp;free_list) {</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">Page</span> *<span class="title">p</span> = <span class="title">le2page</span>(<span class="title">le</span>, <span class="title">page_link</span>);</span></span><br><span class="line">        <span class="keyword">if</span> (p-&gt;property &gt;= n) {</span><br><span class="line">            page = p;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">    <span class="keyword">if</span> (page != <span class="literal">NULL</span>) {</span><br><span class="line">        <span class="keyword">if</span> (page-&gt;property &gt; n) {</span><br><span class="line">            <span class="class"><span class="keyword">struct</span> <span class="title">Page</span> *<span class="title">p</span> = <span class="title">page</span> + <span class="title">n</span>;</span></span><br><span class="line">            p-&gt;property = page-&gt;property - n;</span><br><span class="line">            SetPageProperty(p);</span><br><span class="line">            list_add_after(&amp;(page-&gt;page_link), &amp;(p-&gt;page_link));</span><br><span class="line">        }</span><br><span class="line">        list_del(&amp;(page-&gt;page_link));</span><br><span class="line">        nr_free -= n;</span><br><span class="line">        ClearPageProperty(page);</span><br><span class="line">    }</span><br><span class="line">    <span class="keyword">return</span> page;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">default_free_pages(struct Page *base, <span class="keyword">size_t</span> n) {</span><br><span class="line">    assert(n &gt; <span class="number">0</span>);</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">Page</span> *<span class="title">p</span> = <span class="title">base</span>;</span></span><br><span class="line">    <span class="keyword">for</span> (; p != base + n; p ++) {</span><br><span class="line">        assert(!PageReserved(p) &amp;&amp; !PageProperty(p));</span><br><span class="line">        p-&gt;flags = <span class="number">0</span>;</span><br><span class="line">        set_page_ref(p, <span class="number">0</span>);</span><br><span class="line">    }</span><br><span class="line">    base-&gt;property = n;</span><br><span class="line">    SetPageProperty(base);</span><br><span class="line">    <span class="keyword">list_entry_t</span> *le = list_next(&amp;free_list);</span><br><span class="line">    <span class="keyword">while</span> (le != &amp;free_list) {</span><br><span class="line">        p = le2page(le, page_link);</span><br><span class="line">        le = list_next(le);</span><br><span class="line">        <span class="comment">// <span class="doctag">TODO:</span> optimize</span></span><br><span class="line">        <span class="keyword">if</span> (base + base-&gt;property == p) {</span><br><span class="line">            base-&gt;property += p-&gt;property;</span><br><span class="line">            ClearPageProperty(p);</span><br><span class="line">            list_del(&amp;(p-&gt;page_link));</span><br><span class="line">        }</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (p + p-&gt;property == base) {</span><br><span class="line">            p-&gt;property += base-&gt;property;</span><br><span class="line">            ClearPageProperty(base);</span><br><span class="line">            base = p;</span><br><span class="line">            list_del(&amp;(p-&gt;page_link));</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">    nr_free += n;</span><br><span class="line">    le = list_next(&amp;free_list);</span><br><span class="line">    <span class="keyword">while</span> (le != &amp;free_list) {</span><br><span class="line">        p = le2page(le, page_link);</span><br><span class="line">        <span class="keyword">if</span> (base + base-&gt;property &lt;= p) {</span><br><span class="line">            assert(base + base-&gt;property != p);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        }</span><br><span class="line">        le = list_next(le);</span><br><span class="line">    }</span><br><span class="line">    list_add_before(le, &amp;(base-&gt;page_link));</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/10/03/mineucore-&#x7269;&#x7406;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x5B66;&#x4E60;&#x7B14;&#x8BB0;/20160927100915063.png" alt="img"></p>
 
     </article>
     <!-- license  -->
@@ -451,7 +454,7 @@ height:50vh;
             <p>原文作者：<a href="http://yoursite.com">Po1lux</a>
             <p>原文链接：<a href="http://yoursite.com/2019/10/03/mineucore-物理内存管理学习笔记/">http://yoursite.com/2019/10/03/mineucore-物理内存管理学习笔记/</a>
             <p>发表日期：<a href="http://yoursite.com/2019/10/03/mineucore-物理内存管理学习笔记/">October 3rd 2019, 9:56:48 pm</a>
-            <p>更新日期：<a href="http://yoursite.com/2019/10/03/mineucore-物理内存管理学习笔记/">February 25th 2020, 9:49:31 pm</a>
+            <p>更新日期：<a href="http://yoursite.com/2019/10/03/mineucore-物理内存管理学习笔记/">July 11th 2020, 3:07:32 pm</a>
             <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -596,6 +599,56 @@ top:50vh;
     <div class="sidebar-content sidebar-content-show-archive">
           <div class="sidebar-panel-archives">
     <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
@@ -1741,6 +1794,12 @@ top:50vh;
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
     
+        <span class="sidebar-tag-name" data-tags="unlink"><span class="iconfont-archer">&#xe606;</span>unlink</span>
+    
+        <span class="sidebar-tag-name" data-tags="fastbin attack"><span class="iconfont-archer">&#xe606;</span>fastbin attack</span>
+    
+        <span class="sidebar-tag-name" data-tags="House of spirit"><span class="iconfont-archer">&#xe606;</span>House of spirit</span>
+    
         <span class="sidebar-tag-name" data-tags="UAF"><span class="iconfont-archer">&#xe606;</span>UAF</span>
     
         <span class="sidebar-tag-name" data-tags="DynELF"><span class="iconfont-archer">&#xe606;</span>DynELF</span>
@@ -1750,12 +1809,6 @@ top:50vh;
         <span class="sidebar-tag-name" data-tags="format string"><span class="iconfont-archer">&#xe606;</span>format string</span>
     
         <span class="sidebar-tag-name" data-tags="House of Force"><span class="iconfont-archer">&#xe606;</span>House of Force</span>
-    
-        <span class="sidebar-tag-name" data-tags="unlink"><span class="iconfont-archer">&#xe606;</span>unlink</span>
-    
-        <span class="sidebar-tag-name" data-tags="fastbin attack"><span class="iconfont-archer">&#xe606;</span>fastbin attack</span>
-    
-        <span class="sidebar-tag-name" data-tags="House of spirit"><span class="iconfont-archer">&#xe606;</span>House of spirit</span>
     
         <span class="sidebar-tag-name" data-tags="off by one"><span class="iconfont-archer">&#xe606;</span>off by one</span>
     
@@ -1787,15 +1840,15 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="2016，CTFs，fsb"><span class="iconfont-archer">&#xe606;</span>2016，CTFs，fsb</span>
     
-        <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
-    
         <span class="sidebar-tag-name" data-tags="stack pivoting"><span class="iconfont-archer">&#xe606;</span>stack pivoting</span>
     
-        <span class="sidebar-tag-name" data-tags="OS"><span class="iconfont-archer">&#xe606;</span>OS</span>
+        <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
     
         <span class="sidebar-tag-name" data-tags="pwnable"><span class="iconfont-archer">&#xe606;</span>pwnable</span>
     
         <span class="sidebar-tag-name" data-tags="fsb"><span class="iconfont-archer">&#xe606;</span>fsb</span>
+    
+        <span class="sidebar-tag-name" data-tags="OS"><span class="iconfont-archer">&#xe606;</span>OS</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>

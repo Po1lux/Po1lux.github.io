@@ -29,7 +29,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/2020/02/20/mineucore-x86-32系统启动流程/image-20200221104935105.png">
 <meta property="og:image" content="http://yoursite.com/2020/02/20/mineucore-x86-32系统启动流程/image-20200221105607933.png">
-<meta property="og:updated_time" content="2020-02-22T07:29:35.275Z">
+<meta property="og:updated_time" content="2020-07-11T07:05:01.878Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mineucore-x86-32系统启动流程">
 <meta name="twitter:description" content="&amp;#x5C06;&amp;#x4E4B;&amp;#x524D;&amp;#x7684;&amp;#x8BB0;&amp;#x5F97;&amp;#x4E1C;&amp;#x897F;&amp;#x91CD;&amp;#x65B0;&amp;#x6574;&amp;#x7406;&amp;#x6210;&amp;#x7B14;&amp;#x8BB0;&amp;#xFF0C;&amp;#x53BB;&amp;#x5E74;10&amp;#x6708;&amp;#x4EFD;&amp;#x68B3;&amp;#x7406;&amp;#x4E86;&amp;#x7269;&amp;#x740">
@@ -281,7 +281,7 @@ height:50vh;
                 
                 
                     <div class="post-intro-read">
-                        <span>字数统计: <span class="post-count word-count">1.3k</span>阅读时长: <span class="post-count reading-time">8 min</span></span>
+                        <span>字数统计: <span class="post-count word-count">1.6k</span>阅读时长: <span class="post-count reading-time">9 min</span></span>
                     </div>
                 
                 <div class="post-intro-meta">
@@ -412,13 +412,16 @@ height:50vh;
     <article class="article-entry">
         <p>&#x5C06;&#x4E4B;&#x524D;&#x7684;&#x8BB0;&#x5F97;&#x4E1C;&#x897F;&#x91CD;&#x65B0;&#x6574;&#x7406;&#x6210;&#x7B14;&#x8BB0;&#xFF0C;&#x53BB;&#x5E74;10&#x6708;&#x4EFD;&#x68B3;&#x7406;&#x4E86;&#x7269;&#x7406;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x548C;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x3002;</p>
 <h2 id="1&#x3001;CPU&#x52A0;&#x7535;"><a href="#1&#x3001;CPU&#x52A0;&#x7535;" class="headerlink" title="1&#x3001;CPU&#x52A0;&#x7535;"></a>1&#x3001;CPU&#x52A0;&#x7535;</h2><p>CPU&#x52A0;&#x7535;&#x540E;&#xFF0C;&#x521D;&#x59CB;&#x5316;CS&#x4E0E;IP&#x5BC4;&#x5B58;&#x5668;&#x4E3A;&#x7EA6;&#x5B9A;&#x7684;&#x503C;&#xFF0C;CS&#x4E3A;0xf000&#xFF0C;IP&#x4E3A;0xfff0&#x3002;&#x4E3A;&#x4E86;&#x517C;&#x5BB9;8086&#xFF0C;&#x6B64;&#x65F6;CPU&#x5904;&#x4E8E;16&#x4F4D;&#x7684;&#x5B9E;&#x6A21;&#x5F0F;&#xFF0C;&#x6240;&#x4EE5;&#x5BC4;&#x5B58;&#x5668;&#x4E3A;16&#x4F4D;&#xFF0C;&#x901A;&#x8FC7;&#x4EE3;&#x7801;&#x6BB5;&#x5BC4;&#x5B58;&#x5668;CS&#x548C;&#x6307;&#x4EE4;&#x6307;&#x9488;&#x5BC4;&#x5B58;&#x5668;IP&#xFF0C;&#x8BA1;&#x7B97;PC&#x7684;&#x503C;&#xFF0C;&#x8BA1;&#x7B97;&#x65B9;&#x6CD5;&#x4E3A;PC = CS&lt;&lt;4 +IP&#xFF0C;&#x8FD9;&#x662F;&#x4E00;&#x4E2A;20&#x4F4D;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x6240;&#x4EE5;&#x5B9E;&#x6A21;&#x5F0F;&#x4E0B;CPU&#x7684;&#x5BFB;&#x5740;&#x7A7A;&#x95F4;&#x4E3A;1MB&#xFF0C;&#x8BA1;&#x7B97;&#x5F97;&#x5230;&#x7684;PC = 0xFFFF0&#xFF0C;&#x8FD9;&#x5C31;&#x662F;CPU&#x6267;&#x884C;&#x7684;&#x7B2C;&#x4E00;&#x6761;&#x6307;&#x4EE4;&#xFF0C;<strong>&#x8BE5;&#x6307;&#x4EE4;&#x662F;&#x4E00;&#x4E2A;&#x957F;&#x8DF3;&#x8F6C;&#x6307;&#x4EE4;&#xFF0C;jmp F000:E05B&#xFF0C;&#x8DF3;&#x8F6C;&#x5230;BIOS&#x7A0B;&#x5E8F;&#x8D77;&#x59CB;&#x70B9;</strong>&#xFF0C;&#x5B9E;&#x9645;&#x5730;&#x5740;&#x662F;Base+EIP = FFFF0000 + 0000FFF0 = FFFFFFF0&#x3002;</p>
-<h2 id="2&#x3001;BIOS"><a href="#2&#x3001;BIOS" class="headerlink" title="2&#x3001;BIOS"></a>2&#x3001;BIOS</h2><p>1&#x3001;BIOS&#x9996;&#x5148;&#x8FDB;&#x884C;&#x786C;&#x4EF6;&#x81EA;&#x68C0;<br>2&#x3001;&#x8BFB;&#x53D6;&#x4E3B;&#x5F15;&#x5BFC;&#x8BB0;&#x5F55;&#xFF08;MBR&#xFF09;&#x3002;&#x5F53;BIOS&#x68C0;&#x67E5;&#x5230;&#x786C;&#x4EF6;&#x6B63;&#x5E38;&#x5E76;&#x4E0E;CMOS&#x4E2D;&#x7684;&#x8BBE;&#x7F6E;&#x76F8;&#x7B26;&#x540E;&#xFF0C;&#x6309;&#x7167;CMOS&#x4E2D;&#x5BF9;&#x542F;&#x52A8;&#x8BBE;&#x5907;&#x7684;&#x8BBE;&#x7F6E;&#x987A;&#x5E8F;&#x68C0;&#x6D4B;&#x53EF;&#x7528;&#x7684;&#x542F;&#x52A8;&#x8BBE;&#x5907;&#x3002;BIOS&#x5C06;&#x76F8;&#x5E94;&#x542F;&#x52A8;&#x8BBE;&#x5907;&#x7684;&#x7B2C;&#x4E00;&#x4E2A;&#x6247;&#x533A;&#x8BFB;&#x5165;&#x5185;&#x5B58;&#x5730;&#x5740;&#x4E3A;<strong>0000:7C00H</strong>&#x5904;&#x3002;<br>3&#x3001;BIOS&#x68C0;&#x67E5;MBR&#x6247;&#x533A;&#x7684;&#x7ED3;&#x675F;&#x6807;&#x5FD7;&#x662F;&#x4E0D;&#x662F;0x55AA&#xFF0C;&#x82E5;&#x6EE1;&#x8DB3;&#x8981;&#x6C42;&#xFF0C;&#x5219;&#x79FB;&#x4EA4;&#x63A7;&#x5236;&#x6743;&#x7ED9;MBR&#x3002;</p>
+<h2 id="2&#x3001;BIOS"><a href="#2&#x3001;BIOS" class="headerlink" title="2&#x3001;BIOS"></a>2&#x3001;BIOS</h2><p>1&#x3001;BIOS&#x9996;&#x5148;&#x8FDB;&#x884C;&#x786C;&#x4EF6;&#x81EA;&#x68C0;<br>2&#x3001;&#x8BFB;&#x53D6;&#x4E3B;&#x5F15;&#x5BFC;&#x8BB0;&#x5F55;&#xFF08;MBR&#xFF09;&#x3002;&#x5F53;BIOS&#x68C0;&#x67E5;&#x5230;&#x786C;&#x4EF6;&#x6B63;&#x5E38;&#x5E76;&#x4E0E;CMOS&#x4E2D;&#x7684;&#x8BBE;&#x7F6E;&#x76F8;&#x7B26;&#x540E;&#xFF0C;&#x6309;&#x7167;CMOS&#x4E2D;&#x5BF9;&#x542F;&#x52A8;&#x8BBE;&#x5907;&#x7684;&#x8BBE;&#x7F6E;&#x987A;&#x5E8F;&#x68C0;&#x6D4B;&#x53EF;&#x7528;&#x7684;&#x542F;&#x52A8;&#x8BBE;&#x5907;&#x3002;BIOS&#x5C06;&#x76F8;&#x5E94;&#x542F;&#x52A8;&#x8BBE;&#x5907;&#x7684;&#x7B2C;&#x4E00;&#x4E2A;&#x6247;&#x533A;&#xFF08;&#x4E3B;&#x5F15;&#x5BFC;&#x6247;&#x533A;&#xFF09;&#x8BFB;&#x5165;&#x5185;&#x5B58;&#x5730;&#x5740;&#x4E3A;<strong>0000:7C00H</strong>&#x5904;&#x3002;<br>3&#x3001;BIOS&#x68C0;&#x67E5;MBR&#x6247;&#x533A;&#x7684;&#x7ED3;&#x675F;&#x6807;&#x5FD7;&#x662F;&#x4E0D;&#x662F;0x55AA&#xFF0C;&#x82E5;&#x6EE1;&#x8DB3;&#x8981;&#x6C42;&#xFF0C;&#x5219;&#x79FB;&#x4EA4;&#x63A7;&#x5236;&#x6743;&#x7ED9;MBR&#x3002;</p>
 <p> <strong>&#x7CFB;&#x7EDF;&#x7684;&#x542F;&#x52A8;&#x89C4;&#x8303;&#xFF1A;</strong></p>
 <p>BIOS&#xFF1A;BIOS-MBR&#x3001;BIOS-GPT(&#x5168;&#x5C40;&#x552F;&#x4E00;&#x6807;&#x8BC6;&#x5206;&#x533A;&#x8868;)&#x3001;PXE<br>UEFI&#xFF1A;&#x7EDF;&#x4E00;&#x53EF;&#x6269;&#x5C55;&#x56FA;&#x4EF6;&#x63A5;&#x53E3;&#xFF0C;&#x6BD4;BIOS&#x52A0;&#x5165;&#x4E86;&#x5806;&#x5F15;&#x5BFC;&#x8BB0;&#x5F55;&#x7684;&#x53EF;&#x4FE1;&#x6027;&#x8FDB;&#x884C;&#x4E86;&#x68C0;&#x67E5;&#x7B49;</p>
 <p><strong>BIOS&#x529F;&#x80FD;&#xFF1A;</strong>(Basic Input Output System&#xFF0C;&#x5373;&#x57FA;&#x672C;&#x8F93;&#x5165;/&#x8F93;&#x51FA;&#x7CFB;&#x7EDF;&#xFF09;&#x56FA;&#x8BDD;&#x5728;&#x4E3B;&#x677F;&#x4E0A;&#x7684;&#x7A0B;&#x5E8F;<br>&#x4EE5;&#x4E2D;&#x65AD;&#x8C03;&#x7528;&#x7684;&#x65B9;&#x5F0F;&#x5B9E;&#x73B0;&#x57FA;&#x672C;&#x7684;I/O&#x529F;&#x80FD;&#x3002;<br>INT 10h&#xFF1A;&#x5B57;&#x7B26;&#x663E;&#x793A;<br>INT 13h&#xFF1A;&#x78C1;&#x76D8;&#x6247;&#x533A;&#x8BFB;&#x5199;<br>INT 15h&#xFF1A;&#x68C0;&#x6D4B;&#x5185;&#x5B58;&#x5927;&#x5C0F;<br>INT 16h&#xFF1B;&#x78C1;&#x76D8;&#x8F93;&#x5165;<br>&#xFF08;&#x5728;intel&#x7684;CPU&#x4E2D;&#xFF0C;BIOS&#x53EA;&#x80FD;&#x5728;x86&#x7684;&#x5B9E;&#x6A21;&#x5F0F;&#x4E0B;&#x5DE5;&#x4F5C;&#xFF09;</p>
 <p><strong>Q1&#xFF1A;&#x4E3A;&#x4EC0;&#x4E48;&#x4E0D;&#x5728;BIOS&#x4E2D;&#x76F4;&#x63A5;&#x52A0;&#x8F7D;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#xFF1F;</strong><br>&#x78C1;&#x76D8;&#x5B58;&#x5728;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;BIOS&#x4E0D;&#x53EF;&#x80FD;&#x8BC6;&#x522B;&#x6240;&#x6709;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x6240;&#x4EE5;BIOS&#x4E0D;&#x7BA1;&#x78C1;&#x76D8;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x7C7B;&#x578B;&#xFF0C;&#x76F4;&#x63A5;&#x4ECE;&#x78C1;&#x76D8;&#x7684;&#x7B2C;&#x4E00;&#x4E2A;&#x6247;&#x533A;&#x8BFB;&#x53D6;&#x52A0;&#x8F7D;&#x7A0B;&#x5E8F;&#xFF0C;&#x7528;&#x52A0;&#x8F7D;&#x7A0B;&#x5E8F;&#x8BC6;&#x522B;&#x78C1;&#x76D8;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7C7B;&#x578B;&#xFF0C;&#x5C06;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x52A0;&#x8F7D;&#x8FDB;&#x5185;&#x5B58;</p>
-<h2 id="3&#x3001;MBR&#x4E3B;&#x5F15;&#x5BFC;&#x8BB0;&#x5F55;"><a href="#3&#x3001;MBR&#x4E3B;&#x5F15;&#x5BFC;&#x8BB0;&#x5F55;" class="headerlink" title="3&#x3001;MBR&#x4E3B;&#x5F15;&#x5BFC;&#x8BB0;&#x5F55;"></a>3&#x3001;MBR&#x4E3B;&#x5F15;&#x5BFC;&#x8BB0;&#x5F55;</h2><p>MBR&#x5C06;&#x81EA;&#x5DF1;&#x590D;&#x5236;&#x5230;0000:0600H&#x5904;&#xFF0C;&#x7136;&#x540E;&#x6267;&#x884C;446&#x5B57;&#x8282;&#xFF08;&#x4E00;&#x5171;512&#x5B57;&#x8282;&#xFF09;&#x7684;&#x542F;&#x52A8;&#x4EE3;&#x7801;<br>&#x626B;&#x63CF;&#x5206;&#x533A;&#x8868;&#x67E5;&#x627E;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#xFF1B;<br>&#x5BFB;&#x627E;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x8D77;&#x59CB;&#x6247;&#x533A;&#xFF1B;<br>&#x5C06;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x5F15;&#x5BFC;&#x6247;&#x533A;&#x8BFB;&#x5230;&#x5185;&#x5B58;&#xFF1B;<br>&#x6267;&#x884C;&#x5F15;&#x5BFC;&#x6247;&#x533A;&#x7684;&#x8FD0;&#x884C;&#x4EE3;&#x7801;</p>
-<h2 id="4&#x3001;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x5F15;&#x5BFC;&#x6247;&#x533A;"><a href="#4&#x3001;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x5F15;&#x5BFC;&#x6247;&#x533A;" class="headerlink" title="4&#x3001;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x5F15;&#x5BFC;&#x6247;&#x533A;"></a>4&#x3001;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x5F15;&#x5BFC;&#x6247;&#x533A;</h2><p>&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x5F15;&#x5BFC;&#x6247;&#x533A;&#x7B2C;&#x4E00;&#x6761;&#x662F;&#x8DF3;&#x8F6C;&#x6307;&#x4EE4;&#xFF0C;&#x8DF3;&#x8F6C;&#x5230;&#x5F15;&#x5BFC;&#x4EE3;&#x7801;&#xFF0C;&#x6267;&#x884C;&#x52A0;&#x8F7D;&#x7A0B;&#x5E8F;<br>&#xFF08;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x662F;&#x6307;&#x78C1;&#x76D8;&#x4E3B;&#x5206;&#x533A;&#x7684;&#x4E00;&#x79CD;&#x72B6;&#x6001;&#x3002;&#x6807;&#x8BB0;&#x5206;&#x533A;&#x4E3A;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x76EE;&#x7684;&#x662F;&#x4E3A;&#x4E86;&#x8BA9;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x7531;&#x8BE5;&#x533A;&#x542F;&#x52A8;&#xFF0C;&#x6240;&#x4EE5;&#x901A;&#x5E38;&#x5C06;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x7684;&#x5206;&#x533A;&#x6807;&#x8BB0;&#x4E3A;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#xFF09;</p>
+<h2 id="3&#x3001;MBR&#x4E3B;&#x5F15;&#x5BFC;&#x8BB0;&#x5F55;"><a href="#3&#x3001;MBR&#x4E3B;&#x5F15;&#x5BFC;&#x8BB0;&#x5F55;" class="headerlink" title="3&#x3001;MBR&#x4E3B;&#x5F15;&#x5BFC;&#x8BB0;&#x5F55;"></a>3&#x3001;MBR&#x4E3B;&#x5F15;&#x5BFC;&#x8BB0;&#x5F55;</h2><p>MBR&#x5C06;&#x81EA;&#x5DF1;&#x590D;&#x5236;&#x5230;0000:0600H&#x5904;&#xFF0C;&#x7136;&#x540E;&#x6267;&#x884C;446&#x5B57;&#x8282;&#xFF08;&#x4E00;&#x5171;512&#x5B57;&#x8282;&#xFF09;&#x7684;&#x542F;&#x52A8;&#x4EE3;&#x7801;<br>&#x626B;&#x63CF;&#x78C1;&#x76D8;&#x5206;&#x533A;&#x8868;DPT&#xFF0C;&#x67E5;&#x627E;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#xFF1B;<br>&#x5BFB;&#x627E;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x5F15;&#x5BFC;&#x6247;&#x533A;&#xFF1B;<br>&#x5C06;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x5F15;&#x5BFC;&#x6247;&#x533A;&#x8BFB;&#x5230;&#x5185;&#x5B58;&#xFF1B;<br>&#x6267;&#x884C;&#x5F15;&#x5BFC;&#x6247;&#x533A;&#x7684;&#x8FD0;&#x884C;&#x4EE3;&#x7801;</p>
+<blockquote>
+<p>&#x4E3B;&#x5F15;&#x5BFC;&#x6247;&#x533A;&#x4F4D;&#x4E8E;&#x6574;&#x4E2A;&#x786C;&#x76D8;&#x7684;0&#x78C1;&#x5934;0&#x67F1;&#x9762;1&#x6247;&#x533A;&#xFF0C;&#x5305;&#x542B;&#x4E3B;&#x5F15;&#x5BFC;&#x8BB0;&#x5F55;MBR&#x3001;&#x78C1;&#x76D8;&#x5206;&#x533A;&#x8868;DPT&#x3002;<br>MBR&#x4F5C;&#x7528;&#xFF1A;<br>&#x68C0;&#x67E5;DPT&#x662F;&#x5426;&#x6B63;&#x786E;<br>&#x786E;&#x5B9A;&#x54EA;&#x4E2A;&#x5206;&#x533A;&#x4E3A;&#x5F15;&#x5BFC;&#x6247;&#x533A;<br>&#x5C06;bootload&#x8F7D;&#x5165;&#x5185;&#x5B58;</p>
+</blockquote>
+<h2 id="4&#x3001;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x5F15;&#x5BFC;&#x6247;&#x533A;"><a href="#4&#x3001;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x5F15;&#x5BFC;&#x6247;&#x533A;" class="headerlink" title="4&#x3001;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x5F15;&#x5BFC;&#x6247;&#x533A;"></a>4&#x3001;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x5F15;&#x5BFC;&#x6247;&#x533A;</h2><p>&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x5F15;&#x5BFC;&#x6247;&#x533A;&#x7B2C;&#x4E00;&#x6761;&#x662F;&#x8DF3;&#x8F6C;&#x6307;&#x4EE4;&#xFF0C;&#x8DF3;&#x8F6C;&#x5230;&#x5F15;&#x5BFC;&#x4EE3;&#x7801;&#xFF0C;&#x6267;&#x884C;&#x52A0;&#x8F7D;&#x7A0B;&#x5E8F;<br>&#xFF08;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x662F;&#x6307;&#x78C1;&#x76D8;&#x4E3B;&#x5206;&#x533A;&#x7684;&#x4E00;&#x79CD;&#x72B6;&#x6001;&#x3002;&#x6807;&#x8BB0;&#x5206;&#x533A;&#x4E3A;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x76EE;&#x7684;&#x662F;&#x4E3A;&#x4E86;&#x8BA9;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x7531;&#x8BE5;&#x533A;&#x542F;&#x52A8;&#xFF0C;&#x6240;&#x4EE5;&#x901A;&#x5E38;&#x5C06;&#x542B;&#x6709;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x7684;&#x5206;&#x533A;&#x6807;&#x8BB0;&#x4E3A;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#xFF09;</p>
 <h2 id="5&#x3001;bootloader"><a href="#5&#x3001;bootloader" class="headerlink" title="5&#x3001;bootloader"></a>5&#x3001;bootloader</h2><p><strong>1&#x3001;&#x5F00;&#x542F;A20</strong><br><strong>2&#x3001;&#x521D;&#x59CB;&#x5316;GDT</strong><br><strong>3&#x3001;&#x4F7F;&#x80FD;&#x4FDD;&#x62A4;&#x6A21;&#x5F0F;&#xFF08;&#x5206;&#x6BB5;&#x673A;&#x5236;&#x5728;&#x4FDD;&#x62A4;&#x6A21;&#x5F0F;&#x4E0B;&#x81EA;&#x52A8;&#x4F7F;&#x80FD;&#xFF09;</strong><br>4&#x3001;&#x8BFB;&#x53D6;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#xFF0C;&#x4ECE;&#x786C;&#x76D8;&#x4E0A;&#x8BFB;&#x53D6;kernel&#xFF0C;&#x5E76;&#x653E;&#x5230;&#x5185;&#x5B58;&#x4E2D;&#x7684;&#x56FA;&#x5B9A;&#x4F4D;&#x7F6E;<br>5&#x3001;&#x8DF3;&#x8F6C;&#x5230;kernel&#x7684;&#x5165;&#x53E3;&#x70B9;entry point&#x6267;&#x884C;</p>
 <h2 id="6&#x3001;&#x5F00;&#x542F;A20&#x5730;&#x5740;&#x7EBF;"><a href="#6&#x3001;&#x5F00;&#x542F;A20&#x5730;&#x5740;&#x7EBF;" class="headerlink" title="6&#x3001;&#x5F00;&#x542F;A20&#x5730;&#x5740;&#x7EBF;"></a>6&#x3001;&#x5F00;&#x542F;A20&#x5730;&#x5740;&#x7EBF;</h2><p>&#x5728;i8086&#x65F6;&#x4EE3;&#xFF0C;CPU&#x7684;&#x5730;&#x5740;&#x603B;&#x7EBF;&#x4E3A;16&#x4F4D;&#xFF0C;&#x6570;&#x636E;&#x603B;&#x7EBF;&#x4E3A;20&#x4F4D;&#xFF0C;&#x6700;&#x5927;&#x5BFB;&#x5740;&#x7A7A;&#x95F4;&#x4E3A;1MB&#xFF0C;&#x4F46;&#x662F;&#x5230;&#x4E86;i80286/i80386&#xFF0C;CPU&#x7684;&#x5730;&#x5740;&#x603B;&#x7EBF;&#x53D8;&#x6210;&#x4E86;32&#x4F4D;&#xFF0C;&#x5BFB;&#x5740;&#x7A7A;&#x95F4;&#x4E3A;4GB&#xFF0C;&#x4F46;&#x662F;&#x4E3A;&#x4E86;&#x517C;&#x5BB9;i8086&#xFF0C;CPU&#x5728;&#x52A0;&#x7535;&#x542F;&#x52A8;&#x65F6;&#x4ECD;&#x7136;&#x662F;20&#x4F4D;&#x5BFB;&#x5740;&#xFF0C;&#x6B64;&#x65F6;&#x4E3A;&#x5B9E;&#x6A21;&#x5F0F;&#xFF0C;CPU&#x901A;&#x8FC7;A20&#x5730;&#x5740;&#x7EBF;&#x6A21;&#x5757;&#xFF0C;&#x5728;&#x5B9E;&#x6A21;&#x5F0F;&#x4E0B;&#x5C06;&#x7B2C;20&#x4F4D;&#x7684;&#x5730;&#x5740;&#x7EBF;&#x9650;&#x5236;&#x4E3A;0&#xFF0C;&#x8FD9;&#x6837;CPU&#x5C31;&#x4E0D;&#x80FD;&#x8BBF;&#x95EE;&#x8D85;&#x8FC7;1MB&#x7684;&#x7A7A;&#x95F4;&#x4E86;&#x3002;bootloader&#x8981;&#x4ECE;&#x5B9E;&#x6A21;&#x5F0F;&#x5207;&#x6362;&#x5230;&#x4FDD;&#x62A4;&#x6A21;&#x5F0F;&#xFF0C;&#x83B7;&#x5F97;&#x66F4;&#x5927;&#x7684;&#x5BFB;&#x5740;&#x7A7A;&#x95F4;&#xFF0C;&#x5C31;&#x8981;&#x5F00;&#x542F;A20&#x5730;&#x5740;&#x7EBF;&#xFF0C;&#x83B7;&#x5F97;&#x9AD8;&#x4F4D;&#x5730;&#x5740;&#x7EBF;&#x3002;&#x4E8B;&#x5B9E;&#x4E0A;&#xFF0C;A20&#x5C31;&#x662F;&#x7B2C;21&#x6839;&#x7EBF;&#xFF0C;&#x7528;&#x6765;&#x63A7;&#x5236;&#x662F;&#x5426;&#x5141;&#x8BB8;&#x5BF9; 0x10FFEF &#x4EE5;&#x4E0A;&#x7684;&#x5B9E;&#x9645;&#x5185;&#x5B58;&#x5BFB;&#x5740;&#x3002;&#x79F0;&#x4E3A;A20 Gate&#x3002;</p>
 <h2 id="7&#x3001;&#x521D;&#x59CB;&#x5316;GDT&#xFF08;&#x5168;&#x5C40;&#x63CF;&#x8FF0;&#x7B26;&#x8868;&#xFF09;"><a href="#7&#x3001;&#x521D;&#x59CB;&#x5316;GDT&#xFF08;&#x5168;&#x5C40;&#x63CF;&#x8FF0;&#x7B26;&#x8868;&#xFF09;" class="headerlink" title="7&#x3001;&#x521D;&#x59CB;&#x5316;GDT&#xFF08;&#x5168;&#x5C40;&#x63CF;&#x8FF0;&#x7B26;&#x8868;&#xFF09;"></a>7&#x3001;&#x521D;&#x59CB;&#x5316;GDT&#xFF08;&#x5168;&#x5C40;&#x63CF;&#x8FF0;&#x7B26;&#x8868;&#xFF09;</h2><p>&#x4F7F;&#x80FD;&#x4E86;A20&#x5730;&#x5740;&#x7EBF;&#xFF0C;&#x6709;&#x4E86;&#x66F4;&#x5927;&#x7684;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#xFF0C;&#x5C31;&#x9700;&#x8981;&#x5F00;&#x542F;&#x5206;&#x6BB5;&#x5F0F;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x3002;GDT&#x8868;&#x7531;bootloader&#x521B;&#x5EFA;&#xFF0C;&#x6BCF;&#x4E00;&#x9879;&#x4E3A;&#x6BB5;&#x63CF;&#x8FF0;&#x7B26;&#xFF0C;&#x6BB5;&#x63CF;&#x8FF0;&#x7B26;&#x4E2D;&#x63CF;&#x8FF0;&#x4E86;&#x8BE5;&#x6BB5;&#x7684;&#x8D77;&#x59CB;&#x5730;&#x5740;base&#x548C;&#x5927;&#x5C0F;limit&#x7B49;&#x6570;&#x636E;&#x3002;&#x5728;&#x6CA1;&#x6709;&#x542F;&#x52A8;&#x9875;&#x673A;&#x5236;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x7EBF;&#x6027;&#x5730;&#x5740;&#x7B49;&#x4E8E;&#x7269;&#x7406;&#x5730;&#x5740;</p>
@@ -427,6 +430,8 @@ height:50vh;
 <p><img src="/2020/02/20/mineucore-x86-32&#x7CFB;&#x7EDF;&#x542F;&#x52A8;&#x6D41;&#x7A0B;/image-20200221105607933.png" alt="image-20200221105607933" style="zoom:50%;"></p>
 <h2 id="8&#x3001;&#x4F7F;&#x80FD;&#x4FDD;&#x62A4;&#x6A21;&#x5F0F;"><a href="#8&#x3001;&#x4F7F;&#x80FD;&#x4FDD;&#x62A4;&#x6A21;&#x5F0F;" class="headerlink" title="8&#x3001;&#x4F7F;&#x80FD;&#x4FDD;&#x62A4;&#x6A21;&#x5F0F;"></a>8&#x3001;&#x4F7F;&#x80FD;&#x4FDD;&#x62A4;&#x6A21;&#x5F0F;</h2><p>&#x5F00;&#x542F;A20&#x3001;&#x521D;&#x59CB;&#x5316;GDT&#x540E;&#xFF0C;&#x9700;&#x8981;&#x4F7F;&#x80FD;&#x4FDD;&#x62A4;&#x6A21;&#x5F0F;&#xFF0C;&#x5C06;CR0&#x5BC4;&#x5B58;&#x5668;&#x7684;PE&#x4F4D;(bit0)&#x7F6E;&#x4E3A;1&#x5373;&#x53EF;&#x4F7F;&#x80FD;&#x4FDD;&#x62A4;&#x6A21;&#x5F0F;&#x3002;</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">movl %cr0, %eax</span><br><span class="line">orl 0x1, %eax</span><br><span class="line">movl %eax, %cr0</span><br></pre></td></tr></table></figure>
+<h2 id="9"><a href="#9" class="headerlink" title="9"></a>9</h2><p>&#x8FDB;&#x5165;&#x4FDD;&#x62A4;&#x6A21;&#x5F0F;&#xFF0C;&#x6BB5;&#x5BC4;&#x5B58;&#x5668;CS &#x3001;DS&#x3001; ES&#x3001; FS&#x3001; GS&#x3001; SS &#x53EF;&#x89C1;&#x90E8;&#x5206;&#x662F;16&#x4F4D;&#xFF0C;&#x4E3A;&#x6BB5;&#x9009;&#x62E9;&#x5B50;&#xFF0C;&#x5269;&#x4E0B;80&#x4F4D;&#x4E0D;&#x53EF;&#x89C1;&#xFF0C;&#x6765;&#x81EA;GDT&#xFF0C;CPU&#x4ECE;&#x901A;&#x8FC7;&#x6BB5;&#x9009;&#x62E9;&#x5B50;&#x4ECE; GDT &#x8868;&#x4E2D;&#x53D6;&#x51FA;&#x5BF9;&#x5E94;&#x7684;&#x6BB5;&#x63CF;&#x8FF0;&#x7B26;&#xFF0C;&#x7ECF;&#x8FC7;&#x5206;&#x6790;&#x540E;&#x81EA;&#x52A8;&#x7684;&#x586B;&#x5199;&#x7684;&#x4E86;&#x6BB5;&#x5BC4;&#x5B58;&#x5668;&#x4E2D;&#x3002;</p>
+<p>&#x63CF;&#x8FF0;&#x7B26;&#x8868;&#x6709;&#x4E24;&#x4E2A;&#xFF0C;&#x5168;&#x5C40;&#x63CF;&#x8FF0;&#x7B26;&#x8868;GDT&#x548C;&#x5C40;&#x90E8;&#x63CF;&#x8FF0;&#x7B26;&#x8868;LDT&#xFF0C;GDT&#x662F;&#x4E00;&#x4E2A;&#x6BB5;&#x63CF;&#x8FF0;&#x7B26;&#x6570;&#x7EC4;&#xFF0C;&#x6BCF;&#x4E2A;&#x6BB5;&#x63CF;&#x8FF0;&#x7B26;&#x5360;8&#x4E2A;&#x5B57;&#x8282;&#xFF0C;GDT&#x7684;&#x5730;&#x5740;&#x4FDD;&#x5B58;&#x5728;GDTR&#x5BC4;&#x5B58;&#x5668;&#x4E2D;</p>
 
     </article>
     <!-- license  -->
@@ -435,7 +440,7 @@ height:50vh;
             <p>原文作者：<a href="http://yoursite.com">Po1lux</a>
             <p>原文链接：<a href="http://yoursite.com/2020/02/20/mineucore-x86-32系统启动流程/">http://yoursite.com/2020/02/20/mineucore-x86-32系统启动流程/</a>
             <p>发表日期：<a href="http://yoursite.com/2020/02/20/mineucore-x86-32系统启动流程/">February 20th 2020, 9:31:16 pm</a>
-            <p>更新日期：<a href="http://yoursite.com/2020/02/20/mineucore-x86-32系统启动流程/">February 22nd 2020, 3:29:35 pm</a>
+            <p>更新日期：<a href="http://yoursite.com/2020/02/20/mineucore-x86-32系统启动流程/">July 11th 2020, 3:05:01 pm</a>
             <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -567,7 +572,7 @@ top:50vh;
         <div class="toc-catalog">
             <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
         </div>
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1、CPU加电"><span class="toc-number">1.</span> <span class="toc-text">1、CPU加电</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2、BIOS"><span class="toc-number">2.</span> <span class="toc-text">2、BIOS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3、MBR主引导记录"><span class="toc-number">3.</span> <span class="toc-text">3、MBR主引导记录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4、活动分区的引导扇区"><span class="toc-number">4.</span> <span class="toc-text">4、活动分区的引导扇区</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5、bootloader"><span class="toc-number">5.</span> <span class="toc-text">5、bootloader</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6、开启A20地址线"><span class="toc-number">6.</span> <span class="toc-text">6、开启A20地址线</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7、初始化GDT（全局描述符表）"><span class="toc-number">7.</span> <span class="toc-text">7、初始化GDT（全局描述符表）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8、使能保护模式"><span class="toc-number">8.</span> <span class="toc-text">8、使能保护模式</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1、CPU加电"><span class="toc-number">1.</span> <span class="toc-text">1、CPU加电</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2、BIOS"><span class="toc-number">2.</span> <span class="toc-text">2、BIOS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3、MBR主引导记录"><span class="toc-number">3.</span> <span class="toc-text">3、MBR主引导记录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4、活动分区的引导扇区"><span class="toc-number">4.</span> <span class="toc-text">4、活动分区的引导扇区</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5、bootloader"><span class="toc-number">5.</span> <span class="toc-text">5、bootloader</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6、开启A20地址线"><span class="toc-number">6.</span> <span class="toc-text">6、开启A20地址线</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7、初始化GDT（全局描述符表）"><span class="toc-number">7.</span> <span class="toc-text">7、初始化GDT（全局描述符表）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8、使能保护模式"><span class="toc-number">8.</span> <span class="toc-text">8、使能保护模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9"><span class="toc-number">9.</span> <span class="toc-text">9</span></a></li></ol>
     </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
@@ -580,6 +585,56 @@ top:50vh;
     <div class="sidebar-content sidebar-content-show-archive">
           <div class="sidebar-panel-archives">
     <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
@@ -1725,6 +1780,12 @@ top:50vh;
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
     
+        <span class="sidebar-tag-name" data-tags="unlink"><span class="iconfont-archer">&#xe606;</span>unlink</span>
+    
+        <span class="sidebar-tag-name" data-tags="fastbin attack"><span class="iconfont-archer">&#xe606;</span>fastbin attack</span>
+    
+        <span class="sidebar-tag-name" data-tags="House of spirit"><span class="iconfont-archer">&#xe606;</span>House of spirit</span>
+    
         <span class="sidebar-tag-name" data-tags="UAF"><span class="iconfont-archer">&#xe606;</span>UAF</span>
     
         <span class="sidebar-tag-name" data-tags="DynELF"><span class="iconfont-archer">&#xe606;</span>DynELF</span>
@@ -1734,12 +1795,6 @@ top:50vh;
         <span class="sidebar-tag-name" data-tags="format string"><span class="iconfont-archer">&#xe606;</span>format string</span>
     
         <span class="sidebar-tag-name" data-tags="House of Force"><span class="iconfont-archer">&#xe606;</span>House of Force</span>
-    
-        <span class="sidebar-tag-name" data-tags="unlink"><span class="iconfont-archer">&#xe606;</span>unlink</span>
-    
-        <span class="sidebar-tag-name" data-tags="fastbin attack"><span class="iconfont-archer">&#xe606;</span>fastbin attack</span>
-    
-        <span class="sidebar-tag-name" data-tags="House of spirit"><span class="iconfont-archer">&#xe606;</span>House of spirit</span>
     
         <span class="sidebar-tag-name" data-tags="off by one"><span class="iconfont-archer">&#xe606;</span>off by one</span>
     
@@ -1771,15 +1826,15 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="2016，CTFs，fsb"><span class="iconfont-archer">&#xe606;</span>2016，CTFs，fsb</span>
     
-        <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
-    
         <span class="sidebar-tag-name" data-tags="stack pivoting"><span class="iconfont-archer">&#xe606;</span>stack pivoting</span>
     
-        <span class="sidebar-tag-name" data-tags="OS"><span class="iconfont-archer">&#xe606;</span>OS</span>
+        <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
     
         <span class="sidebar-tag-name" data-tags="pwnable"><span class="iconfont-archer">&#xe606;</span>pwnable</span>
     
         <span class="sidebar-tag-name" data-tags="fsb"><span class="iconfont-archer">&#xe606;</span>fsb</span>
+    
+        <span class="sidebar-tag-name" data-tags="OS"><span class="iconfont-archer">&#xe606;</span>OS</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>

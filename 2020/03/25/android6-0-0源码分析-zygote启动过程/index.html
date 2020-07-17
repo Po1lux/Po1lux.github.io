@@ -28,7 +28,7 @@
 <meta property="og:description" content="&amp;#x5E38;&amp;#x89C4;&amp;#x7CFB;&amp;#x7EDF;&amp;#x542F;&amp;#x52A8;&amp;#x4ECE;cpu&amp;#x52A0;&amp;#x7535;&amp;#xFF0C;&amp;#x4ECE;&amp;#x7F3A;&amp;#x7701;&amp;#x7684;&amp;#x5BC4;&amp;#x5B58;&amp;#x5668;&amp;#x4E0A;&amp;#x8BFB;&amp;#x53D6;&amp;#x7B2C;&amp;#x4E00;&amp;#x6761;&amp;#x5730;&amp;#x57">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/2020/03/25/android6-0-0源码分析-zygote启动过程/zygote.jpg">
-<meta property="og:updated_time" content="2020-03-26T00:25:18.955Z">
+<meta property="og:updated_time" content="2020-07-16T14:12:30.731Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="android-6.0.0源码分析-zygote启动过程">
 <meta name="twitter:description" content="&amp;#x5E38;&amp;#x89C4;&amp;#x7CFB;&amp;#x7EDF;&amp;#x542F;&amp;#x52A8;&amp;#x4ECE;cpu&amp;#x52A0;&amp;#x7535;&amp;#xFF0C;&amp;#x4ECE;&amp;#x7F3A;&amp;#x7701;&amp;#x7684;&amp;#x5BC4;&amp;#x5B58;&amp;#x5668;&amp;#x4E0A;&amp;#x8BFB;&amp;#x53D6;&amp;#x7B2C;&amp;#x4E00;&amp;#x6761;&amp;#x5730;&amp;#x57">
@@ -280,7 +280,7 @@ height:50vh;
                 
                 
                     <div class="post-intro-read">
-                        <span>字数统计: <span class="post-count word-count">804</span>阅读时长: <span class="post-count reading-time">5 min</span></span>
+                        <span>字数统计: <span class="post-count word-count">876</span>阅读时长: <span class="post-count reading-time">5 min</span></span>
                     </div>
                 
                 <div class="post-intro-meta">
@@ -411,11 +411,11 @@ height:50vh;
     <article class="article-entry">
         <p>&#x5E38;&#x89C4;&#x7CFB;&#x7EDF;&#x542F;&#x52A8;&#x4ECE;cpu&#x52A0;&#x7535;&#xFF0C;&#x4ECE;&#x7F3A;&#x7701;&#x7684;&#x5BC4;&#x5B58;&#x5668;&#x4E0A;&#x8BFB;&#x53D6;&#x7B2C;&#x4E00;&#x6761;&#x5730;&#x5740;&#xFF0C;&#x542F;&#x52A8;BIOS&#xFF0C;BIOS&#x8FDB;&#x884C;&#x786C;&#x4EF6;&#x68C0;&#x67E5;&#xFF0C;&#x521D;&#x59CB;&#x5316;&#x4E2D;&#x65AD;&#x5411;&#x91CF;&#x3001;&#x8BBE;&#x7F6E;&#x5BC4;&#x5B58;&#x5668;&#x7B49;&#xFF0C;BIOS&#x8FD8;&#x4F1A;&#x4ECE;&#x4E3B;&#x5F15;&#x5BFC;&#x6247;&#x533A;&#x8BFB;&#x53D6;512&#x5B57;&#x8282;&#x7684;&#x4E3B;&#x5F15;&#x5BFC;&#x8BB0;&#x5F55;MBR&#xFF0C;MBR&#x4F1A;&#x5BFB;&#x627E;&#x6D3B;&#x52A8;&#x5206;&#x533A;&#x7684;&#x5F15;&#x5BFC;&#x8BB0;&#x5F55;&#xFF0C;&#x8BFB;&#x53D6;&#x786C;&#x76D8;&#x4E0A;&#x7684;&#x7CFB;&#x7EDF;&#xFF0C;&#x52A0;&#x8F7D;&#x5230;&#x5185;&#x5B58;&#x4E2D;&#x3002;&#x4E0B;&#x9762;&#x4ECE;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x7684;&#x7B2C;&#x4E00;&#x4E2A;&#x8FDB;&#x7A0B;init&#x8FDB;&#x7A0B;&#x5F00;&#x59CB;</p>
 <p>&#x65F6;&#x5E8F;&#x56FE;&#xFF1A;<br><img src="/2020/03/25/android6-0-0&#x6E90;&#x7801;&#x5206;&#x6790;-zygote&#x542F;&#x52A8;&#x8FC7;&#x7A0B;/zygote.jpg" alt="image-20200325171511529"></p>
-<h2 id="1&#x3001;init"><a href="#1&#x3001;init" class="headerlink" title="1&#x3001;init"></a>1&#x3001;init</h2><p>init&#x8FDB;&#x7A0B;&#x662F;&#x7CFB;&#x7EDF;&#x542F;&#x52A8;&#x7684;&#x7B2C;&#x4E00;&#x4E2A;&#x8FDB;&#x7A0B;&#xFF0C;&#x8FDB;&#x7A0B;&#x901A;&#x8FC7;init.rc&#x811A;&#x672C;&#x6765;&#x542F;&#x52A8;&#x7CFB;&#x7EDF;&#xFF0C;&#x5728;init.rc&#x811A;&#x672C;&#x4E2D;&#x6709;&#x4E00;&#x53E5;import /init.${ro.zygote}.rc&#xFF0C;&#x5728;default.prop&#x4E2D;&#x5B9A;&#x4E49;ro.zygote=zygote32</p>
+<h2 id="1&#x3001;init"><a href="#1&#x3001;init" class="headerlink" title="1&#x3001;init"></a>1&#x3001;init</h2><p>init&#x8FDB;&#x7A0B;&#x662F;&#x7B2C;&#x4E00;&#x4E2A;&#x7528;&#x6237;&#x8FDB;&#x7A0B;&#xFF0C;&#x8FDB;&#x7A0B;&#x53F7;&#x4E3A;1&#x3002;&#x521B;&#x5EFA;&#x4E86;Zygote&#x8FDB;&#x7A0B;&#x548C;&#x5C5E;&#x6027;&#x670D;&#x52A1;&#xFF08;&#x7C7B;&#x4F3C;windows&#x4E0B;&#x7684;&#x6CE8;&#x518C;&#x8868;&#xFF09;&#xFF0C;&#x6E90;&#x7801;&#x5BF9;&#x5E94;&#x76EE;&#x5F55;&#xFF1A;system/core/init&#x3002;<br>init&#x8FDB;&#x7A0B;&#x901A;&#x8FC7;init.rc&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x6765;&#x542F;&#x52A8;&#x7CFB;&#x7EDF;&#xFF0C;&#x5728;init.rc&#x811A;&#x672C;&#x4E2D;&#x6709;&#x4E00;&#x53E5;import /init.${ro.zygote}.rc&#xFF0C;&#x5728;default.prop&#x4E2D;&#x5B9A;&#x4E49;ro.zygote=zygote32</p>
 <p>&#x67E5;&#x770B;&#x8FD9;&#x4E2A;&#x6587;&#x4EF6;&#xFF1A;init.zygote32.rc</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server</span><br><span class="line">    class main</span><br><span class="line">    socket zygote stream 660 root system</span><br><span class="line">    onrestart write /sys/android_power/request_state wake</span><br><span class="line">    onrestart write /sys/power/state on</span><br><span class="line">    onrestart restart media</span><br><span class="line">    onrestart restart netd</span><br></pre></td></tr></table></figure>
 <p>socket&#x5173;&#x952E;&#x5B57;&#x8868;&#x793A;&#x8FD9;&#x4E2A;zygote&#x8FDB;&#x7A0B;&#x9700;&#x8981;&#x4E00;&#x4E2A;&#x540D;&#x79F0;&#x4E3A;&#x201D;zygote&#x201D;&#x7684;socket&#x8D44;&#x6E90;&#xFF1B;onrestart&#x5173;&#x952E;&#x5B57;&#x8868;&#x793A;&#x8FD9;&#x4E2A;zygote&#x8FDB;&#x7A0B;&#x91CD;&#x542F;&#x65F6;&#x9700;&#x8981;&#x6267;&#x884C;&#x7684;&#x547D;&#x4EE4;</p>
-<p>&#x53EF;&#x89C1;zygote&#x8FDB;&#x7A0B;&#x662F;&#x901A;&#x8FC7;app_process&#x521B;&#x5EFA;&#x521B;&#x5EFA;&#x7684;</p>
+<p>&#x53EF;&#x89C1;zygote&#x8FDB;&#x7A0B;&#x662F;&#x901A;&#x8FC7;app_process&#x8FDB;&#x7A0B;&#x521B;&#x5EFA;&#x521B;&#x5EFA;&#x7684;&#xFF0C;app_process&#x8FDB;&#x7A0B;&#x4E0D;&#x4EC5;&#x80FD;&#x542F;&#x52A8;Zygote&#x8FDB;&#x7A0B;&#xFF0C;&#x5B83;&#x53EF;&#x4EE5;&#x6839;&#x636E;&#x4E0D;&#x540C;&#x7684;&#x53C2;&#x6570;&#x5B9E;&#x73B0;&#x4E0D;&#x540C;&#x7684;&#x529F;&#x80FD;&#x3002;</p>
 <h2 id="2&#x3001;app-main-cpp&#x7684;main&#x65B9;&#x6CD5;"><a href="#2&#x3001;app-main-cpp&#x7684;main&#x65B9;&#x6CD5;" class="headerlink" title="2&#x3001;app_main.cpp&#x7684;main&#x65B9;&#x6CD5;"></a>2&#x3001;app_main.cpp&#x7684;main&#x65B9;&#x6CD5;</h2><p>/system/bin/app_process&#x7684;&#x6E90;&#x7801;&#x4F4D;&#x4E8E;frameworks\base\cmds\app_process\app_main.cpp&#xFF0C;&#x5728;app_main.cpp&#x7684;main&#x51FD;&#x6570;&#x4E2D;&#x4E3B;&#x8981;&#x505A;&#x4E86;&#xFF1A;<br>1&#x3001;&#x5904;&#x7406;&#x5206;&#x53D1;&#x5404;&#x79CD;&#x53C2;&#x6570;<br>2&#x3001;&#x521B;&#x5EFA;AppRuntime&#x7684;&#x5B9E;&#x4F8B;&#x5316;&#x5BF9;&#x8C61;runtime    2<br>3&#x3001;&#x8C03;&#x7528;runtime.start(&#x201C;com.android.internal.os.ZygoteInit&#x201D;, args, zygote)&#xFF0C;&#x7C7B;&#x540D;&#x3001;&#x53C2;&#x6570;&#x3001;true    3</p>
 <h2 id="3&#x3001;AndroidRuntime-start"><a href="#3&#x3001;AndroidRuntime-start" class="headerlink" title="3&#x3001;AndroidRuntime.start"></a>3&#x3001;AndroidRuntime.start</h2><p>frameworks/base/core/jni/AndroidRuntime.cpp</p>
 <p>AppRuntime&#x7684;&#x7236;&#x7C7B;&#x662F;AndroidRuntime&#xFF0C;start&#x51FD;&#x6570;&#x4E3B;&#x8981;&#x505A;&#x4E86;&#x4E09;&#x4EF6;&#x4E8B;&#xFF1A;</p>
@@ -445,7 +445,7 @@ height:50vh;
             <p>原文作者：<a href="http://yoursite.com">Po1lux</a>
             <p>原文链接：<a href="http://yoursite.com/2020/03/25/android6-0-0源码分析-zygote启动过程/">http://yoursite.com/2020/03/25/android6-0-0源码分析-zygote启动过程/</a>
             <p>发表日期：<a href="http://yoursite.com/2020/03/25/android6-0-0源码分析-zygote启动过程/">March 25th 2020, 5:14:02 pm</a>
-            <p>更新日期：<a href="http://yoursite.com/2020/03/25/android6-0-0源码分析-zygote启动过程/">March 26th 2020, 8:25:18 am</a>
+            <p>更新日期：<a href="http://yoursite.com/2020/03/25/android6-0-0源码分析-zygote启动过程/">July 16th 2020, 10:12:30 pm</a>
             <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -590,6 +590,56 @@ top:50vh;
     <div class="sidebar-content sidebar-content-show-archive">
           <div class="sidebar-panel-archives">
     <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
@@ -1735,6 +1785,12 @@ top:50vh;
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
     
+        <span class="sidebar-tag-name" data-tags="unlink"><span class="iconfont-archer">&#xe606;</span>unlink</span>
+    
+        <span class="sidebar-tag-name" data-tags="fastbin attack"><span class="iconfont-archer">&#xe606;</span>fastbin attack</span>
+    
+        <span class="sidebar-tag-name" data-tags="House of spirit"><span class="iconfont-archer">&#xe606;</span>House of spirit</span>
+    
         <span class="sidebar-tag-name" data-tags="UAF"><span class="iconfont-archer">&#xe606;</span>UAF</span>
     
         <span class="sidebar-tag-name" data-tags="DynELF"><span class="iconfont-archer">&#xe606;</span>DynELF</span>
@@ -1744,12 +1800,6 @@ top:50vh;
         <span class="sidebar-tag-name" data-tags="format string"><span class="iconfont-archer">&#xe606;</span>format string</span>
     
         <span class="sidebar-tag-name" data-tags="House of Force"><span class="iconfont-archer">&#xe606;</span>House of Force</span>
-    
-        <span class="sidebar-tag-name" data-tags="unlink"><span class="iconfont-archer">&#xe606;</span>unlink</span>
-    
-        <span class="sidebar-tag-name" data-tags="fastbin attack"><span class="iconfont-archer">&#xe606;</span>fastbin attack</span>
-    
-        <span class="sidebar-tag-name" data-tags="House of spirit"><span class="iconfont-archer">&#xe606;</span>House of spirit</span>
     
         <span class="sidebar-tag-name" data-tags="off by one"><span class="iconfont-archer">&#xe606;</span>off by one</span>
     
@@ -1781,15 +1831,15 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="2016，CTFs，fsb"><span class="iconfont-archer">&#xe606;</span>2016，CTFs，fsb</span>
     
-        <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
-    
         <span class="sidebar-tag-name" data-tags="stack pivoting"><span class="iconfont-archer">&#xe606;</span>stack pivoting</span>
     
-        <span class="sidebar-tag-name" data-tags="OS"><span class="iconfont-archer">&#xe606;</span>OS</span>
+        <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
     
         <span class="sidebar-tag-name" data-tags="pwnable"><span class="iconfont-archer">&#xe606;</span>pwnable</span>
     
         <span class="sidebar-tag-name" data-tags="fsb"><span class="iconfont-archer">&#xe606;</span>fsb</span>
+    
+        <span class="sidebar-tag-name" data-tags="OS"><span class="iconfont-archer">&#xe606;</span>OS</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
