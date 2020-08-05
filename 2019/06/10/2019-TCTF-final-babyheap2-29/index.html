@@ -21,7 +21,7 @@
     
     <meta name="description" content>
     <meta name="description" content="0x00 &amp;#x7A0B;&amp;#x5E8F;&amp;#x5206;&amp;#x6790;&amp;#x7A0B;&amp;#x5E8F;&amp;#x7ED9;&amp;#x4E86;libc&amp;#xFF0C;&amp;#x7248;&amp;#x672C;&amp;#x662F;&amp;#x6700;&amp;#x65B0;&amp;#x7248;&amp;#x7684;2.29&amp;#xFF0C;&amp;#x5728;&amp;#x539F;&amp;#x6709;&amp;#x7684;&amp;#x5806;&amp;#x5229;&amp;#x">
-<meta name="keywords" content="libc-2.29,chunk overlapping">
+<meta name="keywords" content="libc-2.29,chunk overlapping,chunk extend">
 <meta property="og:type" content="article">
 <meta property="og:title" content="2019-TCTF(final)-babyheap2.29">
 <meta property="og:url" content="http://yoursite.com/2019/06/10/2019-TCTF-final-babyheap2-29/index.html">
@@ -30,7 +30,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/2019/06/10/2019-TCTF-final-babyheap2-29/image-20190613135826757.png">
 <meta property="og:image" content="http://yoursite.com/2019/06/10/2019-TCTF-final-babyheap2-29/image-20190614094206536.png">
-<meta property="og:updated_time" content="2019-10-09T07:27:27.979Z">
+<meta property="og:updated_time" content="2020-07-22T22:56:12.836Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="2019-TCTF(final)-babyheap2.29">
 <meta name="twitter:description" content="0x00 &amp;#x7A0B;&amp;#x5E8F;&amp;#x5206;&amp;#x6790;&amp;#x7A0B;&amp;#x5E8F;&amp;#x7ED9;&amp;#x4E86;libc&amp;#xFF0C;&amp;#x7248;&amp;#x672C;&amp;#x662F;&amp;#x6700;&amp;#x65B0;&amp;#x7248;&amp;#x7684;2.29&amp;#xFF0C;&amp;#x5728;&amp;#x539F;&amp;#x6709;&amp;#x7684;&amp;#x5806;&amp;#x5229;&amp;#x">
@@ -286,6 +286,8 @@ height:50vh;
     
         <a class="post-tag" href="javascript:void(0);" data-tags = "chunk overlapping">chunk overlapping</a>
     
+        <a class="post-tag" href="javascript:void(0);" data-tags = "chunk extend">chunk extend</a>
+    
 </div>
                 
                 
@@ -454,7 +456,7 @@ height:50vh;
             <p>原文作者：<a href="http://yoursite.com">Po1lux</a>
             <p>原文链接：<a href="http://yoursite.com/2019/06/10/2019-TCTF-final-babyheap2-29/">http://yoursite.com/2019/06/10/2019-TCTF-final-babyheap2-29/</a>
             <p>发表日期：<a href="http://yoursite.com/2019/06/10/2019-TCTF-final-babyheap2-29/">June 10th 2019, 12:54:46 pm</a>
-            <p>更新日期：<a href="http://yoursite.com/2019/06/10/2019-TCTF-final-babyheap2-29/">October 9th 2019, 3:27:27 pm</a>
+            <p>更新日期：<a href="http://yoursite.com/2019/06/10/2019-TCTF-final-babyheap2-29/">July 23rd 2020, 6:56:12 am</a>
             <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -1796,23 +1798,11 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="unlink"><span class="iconfont-archer">&#xe606;</span>unlink</span>
     
+        <span class="sidebar-tag-name" data-tags="House of Force"><span class="iconfont-archer">&#xe606;</span>House of Force</span>
+    
         <span class="sidebar-tag-name" data-tags="fastbin attack"><span class="iconfont-archer">&#xe606;</span>fastbin attack</span>
     
         <span class="sidebar-tag-name" data-tags="House of spirit"><span class="iconfont-archer">&#xe606;</span>House of spirit</span>
-    
-        <span class="sidebar-tag-name" data-tags="UAF"><span class="iconfont-archer">&#xe606;</span>UAF</span>
-    
-        <span class="sidebar-tag-name" data-tags="DynELF"><span class="iconfont-archer">&#xe606;</span>DynELF</span>
-    
-        <span class="sidebar-tag-name" data-tags="PIE"><span class="iconfont-archer">&#xe606;</span>PIE</span>
-    
-        <span class="sidebar-tag-name" data-tags="format string"><span class="iconfont-archer">&#xe606;</span>format string</span>
-    
-        <span class="sidebar-tag-name" data-tags="House of Force"><span class="iconfont-archer">&#xe606;</span>House of Force</span>
-    
-        <span class="sidebar-tag-name" data-tags="off by one"><span class="iconfont-archer">&#xe606;</span>off by one</span>
-    
-        <span class="sidebar-tag-name" data-tags="x64"><span class="iconfont-archer">&#xe606;</span>x64</span>
     
         <span class="sidebar-tag-name" data-tags="64bit"><span class="iconfont-archer">&#xe606;</span>64bit</span>
     
@@ -1822,15 +1812,29 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="Canary"><span class="iconfont-archer">&#xe606;</span>Canary</span>
     
-        <span class="sidebar-tag-name" data-tags="tcache"><span class="iconfont-archer">&#xe606;</span>tcache</span>
+        <span class="sidebar-tag-name" data-tags="off by one"><span class="iconfont-archer">&#xe606;</span>off by one</span>
+    
+        <span class="sidebar-tag-name" data-tags="x64"><span class="iconfont-archer">&#xe606;</span>x64</span>
+    
+        <span class="sidebar-tag-name" data-tags="UAF"><span class="iconfont-archer">&#xe606;</span>UAF</span>
+    
+        <span class="sidebar-tag-name" data-tags="DynELF"><span class="iconfont-archer">&#xe606;</span>DynELF</span>
+    
+        <span class="sidebar-tag-name" data-tags="PIE"><span class="iconfont-archer">&#xe606;</span>PIE</span>
+    
+        <span class="sidebar-tag-name" data-tags="format string"><span class="iconfont-archer">&#xe606;</span>format string</span>
     
         <span class="sidebar-tag-name" data-tags="libc-2.29"><span class="iconfont-archer">&#xe606;</span>libc-2.29</span>
     
         <span class="sidebar-tag-name" data-tags="chunk overlapping"><span class="iconfont-archer">&#xe606;</span>chunk overlapping</span>
     
+        <span class="sidebar-tag-name" data-tags="chunk extend"><span class="iconfont-archer">&#xe606;</span>chunk extend</span>
+    
         <span class="sidebar-tag-name" data-tags="shellcode，系统调用"><span class="iconfont-archer">&#xe606;</span>shellcode，系统调用</span>
     
         <span class="sidebar-tag-name" data-tags="libc2.29"><span class="iconfont-archer">&#xe606;</span>libc2.29</span>
+    
+        <span class="sidebar-tag-name" data-tags="tcache"><span class="iconfont-archer">&#xe606;</span>tcache</span>
     
         <span class="sidebar-tag-name" data-tags="stack overflow"><span class="iconfont-archer">&#xe606;</span>stack overflow</span>
     
@@ -1840,15 +1844,15 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="2016，CTFs，fsb"><span class="iconfont-archer">&#xe606;</span>2016，CTFs，fsb</span>
     
-        <span class="sidebar-tag-name" data-tags="stack pivoting"><span class="iconfont-archer">&#xe606;</span>stack pivoting</span>
-    
         <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
     
-        <span class="sidebar-tag-name" data-tags="pwnable"><span class="iconfont-archer">&#xe606;</span>pwnable</span>
+        <span class="sidebar-tag-name" data-tags="stack pivoting"><span class="iconfont-archer">&#xe606;</span>stack pivoting</span>
+    
+        <span class="sidebar-tag-name" data-tags="OS"><span class="iconfont-archer">&#xe606;</span>OS</span>
     
         <span class="sidebar-tag-name" data-tags="fsb"><span class="iconfont-archer">&#xe606;</span>fsb</span>
     
-        <span class="sidebar-tag-name" data-tags="OS"><span class="iconfont-archer">&#xe606;</span>OS</span>
+        <span class="sidebar-tag-name" data-tags="pwnable"><span class="iconfont-archer">&#xe606;</span>pwnable</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
@@ -1895,9 +1899,9 @@ jsonContent:
     
         <span class="sidebar-category-name" data-categories="Operating-System"><span class="iconfont-archer">&#xe60a;</span>Operating-System</span>
     
-        <span class="sidebar-category-name" data-categories="pwnable"><span class="iconfont-archer">&#xe60a;</span>pwnable</span>
-    
         <span class="sidebar-category-name" data-categories="conclusion"><span class="iconfont-archer">&#xe60a;</span>conclusion</span>
+    
+        <span class="sidebar-category-name" data-categories="pwnable"><span class="iconfont-archer">&#xe60a;</span>pwnable</span>
     
     </div>
     <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
